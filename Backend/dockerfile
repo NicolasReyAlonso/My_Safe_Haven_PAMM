@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Instalar dependencias
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código
+COPY . ./mysafehaven
+
+# Exponer el puerto de Flask
+EXPOSE 5000
+
+# Comando para iniciar la API
+CMD ["python", "app.py"]
