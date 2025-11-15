@@ -1,0 +1,51 @@
+\newtcolorbox{UserStoryBox}[1]{%
+  enhanced,                % habilita opciones avanzadas
+  colback=white,           % color de fondo del contenido
+  colframe=black,          % color del borde
+  boxrule=0.8pt,           % grosor del borde
+  arc=3mm,                 % esquinas redondeadas
+  left=3mm, right=3mm, top=2mm, bottom=2mm,
+  colbacktitle=black,    % color de fondo del título
+  coltitle=white,           % color del texto del título
+  fonttitle=\bfseries,      % estilo del título
+  halign title=center,      % centrado horizontal del título
+  title=#1                  % el título a mostrar
+}
+
+
+\newcommand{\UserStory}[8]{%
+\begin{UserStoryBox}{#1} % #1 = Nombre
+\textbf{ID:} #2\\
+\textbf{Prioridad:} #3\\
+\textbf{Estimación:} #4\\
+\rule{\linewidth}{0.4pt} % línea horizontal
+
+\textbf{Historia:}\\
+\quad \textbf{Como:} #5\\
+\quad \textbf{Quiero/necesito:} #6\\
+\quad \textbf{Para:} #7\\
+\rule{\linewidth}{0.4pt}
+
+\textbf{Criterios de validación:}\\
+\begin{itemize}
+#8
+\end{itemize}
+\end{UserStoryBox}
+}
+
+
+\subsection{Sprint 0}
+Las \textbf{historias} que se implementan en este sprint son las siguientes:
+\UserStory
+{Loggear en la APP}
+{0}
+{0}
+{4h}
+{Usuario}
+{Loggearme en la aplicacion}
+{Poder usar la app con mis credenciales}
+{
+\item Cuando no ponga bien la contraseña me debe salir el error.
+\item Cuando me logge, debe haber alguna indicación de que lo he hecho correctamente.
+}
+
