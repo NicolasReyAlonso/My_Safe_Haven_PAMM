@@ -1,0 +1,8 @@
+FROM postgres:17
+
+# Variables de entorno (opcional, se pueden definir en docker run)
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=Nicololo
+ENV POSTGRES_DB=mysafehaven
+
+EXPOSE 5432
