@@ -21,7 +21,7 @@ services:
       POSTGRES_PASSWORD: contraseña
       POSTGRES_DB: midb
     ports:
-      - "5000:5000"
+      - "5050:5050"
     depends_on:
       - db
 
