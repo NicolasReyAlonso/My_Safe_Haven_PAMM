@@ -2,6 +2,7 @@ package com.nicojero.mysafehaven.presentation.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+<<<<<<< HEAD
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Star
@@ -16,11 +17,25 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.nicojero.mysafehaven.domain.model.Notification
 import com.nicojero.mysafehaven.domain.model.User
+=======
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.nicojero.mysafehaven.data.remote.RetrofitClient
+import com.nicojero.mysafehaven.data.repository.UserRepositoryImpl
+>>>>>>> e8b9d1aad904928b29b16c32d7b0574bf7d2bc91
 import com.nicojero.mysafehaven.presentation.ui.components.BottomNavItem
 import com.nicojero.mysafehaven.presentation.ui.components.RadarBottomNavigation
 import com.nicojero.mysafehaven.presentation.ui.components.RadarTopBar
 import com.nicojero.mysafehaven.presentation.ui.navigation.NavigationGraph
 import com.nicojero.mysafehaven.presentation.ui.navigation.Screen
+<<<<<<< HEAD
+=======
+import com.nicojero.mysafehaven.domain.model.User
+import com.nicojero.mysafehaven.domain.model.Notification
+>>>>>>> e8b9d1aad904928b29b16c32d7b0574bf7d2bc91
 
 @Composable
 fun MainScaffold() {
@@ -44,8 +59,12 @@ fun MainScaffold() {
     val bottomNavItems = listOf(
         BottomNavItem(Screen.Home.route, Icons.Filled.Star, "Label"),
         BottomNavItem(Screen.Search.route, Icons.Filled.AddCircle, "Label"),
+<<<<<<< HEAD
         BottomNavItem(Screen.Profile.route, Icons.Filled.Add, "Label"),
         BottomNavItem(Screen.Login.route, Icons.Filled.Add, "Label"),
+=======
+        BottomNavItem(Screen.Profile.route, Icons.Filled.Add, "Label")
+>>>>>>> e8b9d1aad904928b29b16c32d7b0574bf7d2bc91
     )
 
     Scaffold(

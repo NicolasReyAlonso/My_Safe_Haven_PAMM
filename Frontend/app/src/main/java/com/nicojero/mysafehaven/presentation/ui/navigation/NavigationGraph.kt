@@ -6,9 +6,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nicojero.mysafehaven.presentation.ui.screens.HomeScreen
+<<<<<<< HEAD
 import com.nicojero.mysafehaven.presentation.ui.screens.LoginScreen
 import com.nicojero.mysafehaven.presentation.ui.screens.ProfileScreen
 import com.nicojero.mysafehaven.presentation.ui.screens.RegisterScreen
+=======
+import com.nicojero.mysafehaven.presentation.ui.screens.ProfileScreen
+>>>>>>> e8b9d1aad904928b29b16c32d7b0574bf7d2bc91
 import com.nicojero.mysafehaven.presentation.ui.screens.SearchScreen
 
 @Composable
@@ -21,12 +25,15 @@ fun NavigationGraph(
         startDestination = Screen.Home.route,
         modifier = modifier
     ) {
+<<<<<<< HEAD
         composable(Screen.Login.route) {
             LoginScreen(navController)
         }
         composable(Screen.Register.route) {
             RegisterScreen(navController)
         }
+=======
+>>>>>>> e8b9d1aad904928b29b16c32d7b0574bf7d2bc91
         composable(Screen.Home.route) {
             HomeScreen()
         }
