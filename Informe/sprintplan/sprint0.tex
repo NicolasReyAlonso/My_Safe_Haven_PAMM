@@ -1,0 +1,293 @@
+\newtcolorbox{UserStoryBox}[1]{%
+  enhanced,                % habilita opciones avanzadas
+  colback=white,           % color de fondo del contenido
+  colframe=black,          % color del borde
+  boxrule=0.8pt,           % grosor del borde
+  arc=3mm,                 % esquinas redondeadas
+  left=3mm, right=3mm, top=2mm, bottom=2mm,
+  colbacktitle=black,    % color de fondo del título
+  coltitle=white,           % color del texto del título
+  fonttitle=\bfseries,      % estilo del título
+  halign title=center,      % centrado horizontal del título
+  title=#1                  % el título a mostrar
+}
+
+\newtcolorbox{TechStoryBox}[1]{%
+  enhanced,                % habilita opciones avanzadas
+  colback=black,           % color de fondo del contenido
+  colframe=gray,          % color del borde
+  boxrule=0.8pt,           % grosor del borde
+  arc=3mm,                 % esquinas redondeadas
+  left=3mm, right=3mm, top=2mm, bottom=2mm,
+  colbacktitle=white,    % color de fondo del título
+  coltitle=black,           % color del texto del título
+  fonttitle=\bfseries,      % estilo del título
+  halign title=center,      % centrado horizontal del título
+  title=#1,                  % el título a mostrar
+  coltext=white
+}
+
+\newcommand{\TechStory}[8]{%
+\begin{TechStoryBox}{#1} % #1 = Nombre
+\textbf{ID:} #2\\
+\textbf{Prioridad:} #3\\
+\textbf{Estimación:} #4\\
+\rule{\linewidth}{0.4pt} % línea horizontal
+
+\textbf{Historia:}\\
+\quad \textbf{Como:} #5\\
+\quad \textbf{Quiero/necesito:} #6\\
+\quad \textbf{Para:} #7\\
+\rule{\linewidth}{0.4pt}
+
+\textbf{Criterios de validación:}\\
+\begin{itemize}
+#8
+\end{itemize}
+\end{TechStoryBox}
+}
+
+
+
+\newcommand{\UserStory}[8]{%
+\begin{UserStoryBox}{#1} % #1 = Nombre
+\textbf{ID:} #2\\
+\textbf{Prioridad:} #3\\
+\textbf{Estimación:} #4\\
+\rule{\linewidth}{0.4pt} % línea horizontal
+
+\textbf{Historia:}\\
+\quad \textbf{Como:} #5\\
+\quad \textbf{Quiero/necesito:} #6\\
+\quad \textbf{Para:} #7\\
+\rule{\linewidth}{0.4pt}
+
+\textbf{Criterios de validación:}\\
+\begin{itemize}
+#8
+\end{itemize}
+\end{UserStoryBox}
+}
+
+
+\subsection{Sprint 0}
+Las \textbf{historias} que se implementan en este sprint son las siguientes:
+\UserStory
+{Loggear en la APP}
+{0}
+{0}
+{4h}
+{Usuario}
+{Loggearme en la aplicacion}
+{Poder usar la app con mis credenciales}
+{
+\item Cuando no ponga bien la contraseña me debe salir el error.
+\item Cuando me logge, debe haber alguna indicación de que lo he hecho correctamente.
+}
+
+\TechStory
+{Base de datos postgres}
+{1}
+{0}
+{4h}
+{Desarrollador}
+{Una base de datos postgres lanzable en mi pc}
+{Poder desarrollar la aplicación}
+{
+\item Tiene que accederse por el puerto 5243.
+}
+
+\TechStory
+{Mockups figma}
+{2}
+{0}
+{8h}
+{Desarrollador}
+{Unos mockups en figma}
+{Poder desarrollar la aplicación}
+{
+\item tienen que representar el diseño de la aplicación.
+\item tienen que poseer las vista de movil y tablet.
+\item tiene que contener el tema de colores de la aplicacion.
+}
+
+\UserStory
+{Obtener mis havens}
+{3}
+{0}
+{8h}
+{Usuario}
+{obtener mis havens}
+{poder gestionarlos y visualizarlos}
+{
+\item Se deven ver los havens propios y en los que participo.
+\item Mis havens deven tener un botón que me permitan gestionarlos.
+\item Los havens deven poderse filtrarion.
+}
+
+\TechStory
+{Tablero trello}
+{4}
+{0}
+{8h}
+{Desarrollador}
+{Un tablero trello}
+{realizar el desarrollo de los sprints}
+{
+\item Debe tener todas las historias del sprint 0 a desarrollar.
+}
+
+\TechStory
+{Plan de sprint}
+{5}
+{0}
+{8h}
+{Desarrollador}
+{Un plan de sprint}
+{realizar el desarrollo de los sprints}
+{
+\item Debe representar las tareas a realizar.
+}
+
+\TechStory
+{Backend desplegable en docker}
+{6}
+{0}
+{2h}
+{Desarrollador}
+{Un backend desplegable en docker}
+{aumentar la portabilidad y la facilidad de despliegue del backend}
+{
+\item Debe representar las tareas a realizar.
+}
+
+\UserStory
+{Crear Haven}
+{7}
+{0}
+{8h}
+{Usuario}
+{Crear un haven}
+{Tener mi feed personal}
+{
+\item Si ya hay un haven en el mismo sitio aproximado no debe de poderse crear.
+\item Al crearse debe mostrarse un mensaje de creado y navegar al feed del haven.
+\item No debe poderme permitir poner el mismo nombre a dos havens.
+\item Debo poder poner información de nombre y descripción al haven.
+\item En la versión gratuita no puedo crear más de dos havens.
+\item Se me debe crear una feed vacía automáticamente al crear el haven.
+\item Debe poder ser publico o privado
+}
+
+\UserStory
+{Eliminar un haven}
+{8}
+{0}
+{4h}
+{Usuario}
+{Eliminar un haven}
+{Poder gestionar mis havens}
+{
+\item Solo debo poderlo eliminar si es mío.
+\item Al eliminarlo debe salirme un mensaje de confirmación.
+\item Se me deven dejar una segundos en los que pueda deshacer la acción.
+}
+
+\UserStory
+{Editar un haven}
+{9}
+{0}
+{4h}
+{Usuario}
+{Editar un haven}
+{Cambiar su nombre o descripción}
+{
+\item Solo debo poderlo editarlo si es mío.
+\item No debo de poder cambiarle el nombre a uno que ya exista.
+\item Se me deven dejar una segundos en los que pueda deshacer la acción.
+}
+
+\UserStory
+{Añadir posts a mi Haven Feed}
+{10}
+{0}
+{4h}
+{Usuario}
+{Añadir posts en el feed de mi haven}
+{Que mis amigos lo vean cuando estén en mi haven}
+{
+\item Deben poder ser de tipo texto.
+\item Deben de poder ser de tipo media (Música, Imagen o Vídeo).
+\item El texto debe ser enriquecido (Negrita etc).
+}
+
+\UserStory
+{Visualizar Haven Feeds}
+{11}
+{0}
+{8h}
+{Usuario}
+{acceder a una haven feed}
+{ver sus publicaciones}
+{
+\item Solo debo de poder verla si estoy físicamente en el haven.
+\item Si no estoy añadido al haven, no devo de poder verlo.
+\item Los posts se mostraran de más nuevos a más viejos.
+}
+
+\UserStory
+{Añadir usuarios a mi haven feed}
+{12}
+{0}
+{8h}
+{Usuario}
+{poder añadir a usuarios a mi haven feed}
+{que vean mis publicaciones}
+{
+\item Devo de poder enviar invitaciones a amigos.
+\item Si pasa alguien por mi haven, me debe salir una notificación que me permita invitarle.
+}
+
+\UserStory
+{Eliminar posts de mi Haven Feed}
+{13}
+{0}
+{2h}
+{Usuario}
+{poder eliminar posts de mi haven feed}
+{desechar posts que ya no me representan}
+{
+\item Debo de mostrarme un mensaje de confirmación antes de eliminar.
+\item Debo de tener un tiempo en el que pueda deshacerlo.
+}
+
+\UserStory
+{Registrarme en My Safe Haven}
+{14}
+{0}
+{4h}
+{Usuario}
+{registrarme en my safe haven}
+{poder disfrutar de la red social completa}
+{
+\item Debe llegarme un correo de confirmación al mail.
+\item La contraseña debe de ser segura, y si no lo es mostrar el error.
+\item El correo electrónico debe de ser válido.
+}
+
+\UserStory
+{Navegar en la app}
+{15}
+{0}
+{4h}
+{Usuario}
+{navegar por la aplicación}
+{Poder usar todas sus funciones}
+{
+\item Se deben poder acceder a las páginas principales.
+\item La navegación deve ser fluida y seguir los principios de M3 Design
+}
+
+
+
+

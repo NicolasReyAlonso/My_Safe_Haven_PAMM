@@ -1,0 +1,6 @@
+psycopg2-binary
+Flask
+flask-cors
+flask-sockets
+flask_sqlalchemy
+flask-migrate

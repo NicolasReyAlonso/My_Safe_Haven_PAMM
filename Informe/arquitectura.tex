@@ -1,0 +1,45 @@
+\section{Arquitectura}
+Las arquitecturas que hemos decidido utilizar para el desarrollo de esta aplicación son las siguientes:
+\begin{center}
+    \textbf{\textit{Clean Architecture + MVVM + Jetpack (Compose/Views)}}
+\end{center}
+
+\subsection{MVVM}
+El patrón \textit{Model–View–ViewModel} (MVVM) nos permite separar de forma efectiva la lógica de presentación de la lógica de la interfaz.
+ Esto facilita el mantenimiento del código y reduce el acoplamiento entre componentes. 
+ Las principales ventajas por las que elegimos este patrón son:
+
+\begin{itemize}
+    \item Permite que las vistas contengan únicamente lógica de interfaz, manteniendo un código más limpio y fácil de extender.
+    \item Los \textit{ViewModels} soportan persistencia de estado incluso frente a cambios de configuración,
+    como la rotación de pantalla.
+    \item Incrementa la capacidad de realizar pruebas unitarias al separar las responsabilidades dentro del flujo de datos.
+\end{itemize}
+
+\subsection{Clean Architecture}
+La \textit{Clean Architecture} garantiza una separación clara entre las reglas de negocio, 
+los datos y la interfaz de usuario. Esta división en capas mejora considerablemente la escalabilidad y 
+mantenibilidad del sistema. Lo seleccionamos debido a sus siguientes beneficios:
+
+\begin{itemize}
+    \item Define límites bien estructurados mediante capas independientes: dominio, datos y presentación.
+    \item Permite encapsular la lógica central de negocio en casos de uso (\textit{use cases}), 
+    facilitando la evolución del proyecto sin afectar otras capas.
+    \item Facilita la integración de servicios externos, como APIs, sensores de ubicación o bases de datos locales.
+    \item Reduce el acoplamiento, lo que permite sustituir componentes (por ejemplo, cambiar la base de datos local) 
+    sin modificar la lógica interna.
+    \item Mejora considerablemente la capacidad de realizar pruebas, especialmente sobre reglas de negocio.
+\end{itemize}
+
+\subsection{Jetpack (Compose/Views)}
+El ecosistema \textit{Jetpack} nos proporciona herramientas modernas y altamente optimizadas para el desarrollo de 
+interfaces y funcionalidades móviles. Dentro del proyecto empleamos tanto \textit{Compose} como vistas 
+tradicionales (\textit{Views}), según las necesidades de cada pantalla. Las razones principales para utilizar estas 
+tecnologías son:
+
+\begin{itemize}
+    \item \textit{Jetpack Compose} permite crear interfaces declarativas, más intuitivas y fáciles de mantener.
+    \item Ofrece integración natural con \textit{ViewModels}, \textit{StateFlow} y otros componentes de arquitectura.
+    \item Simplifica el manejo del estado y el renderizado dinámico de la UI.
+    \item Framework optimizado por Google para el desarrollo moderno de Android, asegurando compatibilidad y evolución a largo plazo.
+\end{itemize}

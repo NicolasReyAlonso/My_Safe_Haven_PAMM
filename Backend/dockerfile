@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar solo la carpeta de la app
+COPY my_safe_haven_back ./my_safe_haven_back
+
+WORKDIR /app/my_safe_haven_back
+
+EXPOSE 5050
+
+CMD ["python", "app.py"]
