@@ -52,8 +52,8 @@ fun MainScaffold() {
         BottomNavItem(Screen.Home.route, Icons.Filled.Star, "Label"),
         BottomNavItem(Screen.Search.route, Icons.Filled.AddCircle, "Label"),
         BottomNavItem(Screen.Profile.route, Icons.Filled.Add, "Label"),
-        BottomNavItem(Screen.Login.route, Icons.Filled.Add, "Label"),
-        BottomNavItem(Screen.Profile.route, Icons.Filled.Add, "Label")
+        BottomNavItem(Screen.Login.route, Icons.Filled.AccountCircle, "Login"),
+        BottomNavItem(Screen.Register.route, Icons.Filled.AccountCircle, "Register")
 
     )
 
