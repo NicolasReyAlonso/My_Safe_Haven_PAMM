@@ -1,0 +1,7 @@
+CREATE TABLE chat_messages (
+    message_id SERIAL PRIMARY KEY,
+    haven_id INTEGER NOT NULL REFERENCES havens(haven_id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    date TIMESTAMP NOT NULL DEFAULT NOW()
+);
