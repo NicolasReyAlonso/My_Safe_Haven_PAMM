@@ -1,6 +1,10 @@
-psycopg2-binary
-Flask
-flask-cors
-flask-sockets
-flask_sqlalchemy
-flask-migrate
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.5
+Flask-JWT-Extended==4.6.0
+Flask-SocketIO==5.3.6
+psycopg2-binary==2.9.9
+python-socketio==5.11.0
+python-engineio==4.9.0
+Werkzeug==3.0.1
+eventlet==0.35.2
