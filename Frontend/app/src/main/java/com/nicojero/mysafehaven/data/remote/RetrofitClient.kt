@@ -3,8 +3,8 @@ package com.nicojero.mysafehaven.data.remote
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:5000/" // Para emulador Android
+object RetrofitClientOld {
+    private const val BASE_URL = "http://10.195.126.86:5050/" // Para emulador Android
     // Para dispositivo físico usa: "http://TU_IP:5000/"
 
     val apiService: ApiService by lazy {

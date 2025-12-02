@@ -1,8 +1,10 @@
 package com.nicojero.mysafehaven.domain.model
 
 data class User(
-    val id: String,
-    val name: String,
-    val email: String,
-    val isLoggedIn: Boolean
+    val id: Int,
+    val username: String,
+    val mail: String,
+    val profileImagePath: String?,
+    val pro: Boolean,
+    val token: String   // <--- necesario
 )
