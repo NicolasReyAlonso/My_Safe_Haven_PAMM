@@ -1,3 +1,4 @@
+// ========== LoginScreen.kt ==========
 package com.nicojero.mysafehaven.presentation.ui.screens
 
 import androidx.compose.foundation.clickable
@@ -8,27 +9,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.nicojero.mysafehaven.presentation.viewmodel.AuthState
+import com.nicojero.mysafehaven.presentation.viewmodel.AuthUiState
 import com.nicojero.mysafehaven.presentation.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
-    navController: NavController,
-    authViewModel: AuthViewModel
+    viewModel: AuthViewModel,
+    onNavigateToHome: () -> Unit,
+    onNavigateToRegister: () -> Unit
 ) {
     var emailOrUsername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    val authState by authViewModel.authState.collectAsState()
+    val authState by viewModel.authState.collectAsState()
 
     // Navegar cuando el login sea exitoso
     LaunchedEffect(authState) {
-        if (authState is AuthState.Success) {
-            navController.navigate("home") {
-                popUpTo("login") { inclusive = true }
-            }
-            authViewModel.resetAuthState()
+        if (authState is AuthUiState.Success) {
+            onNavigateToHome()
+            viewModel.resetAuthState()
         }
     }
 
@@ -55,7 +54,7 @@ fun LoginScreen(
             onValueChange = { emailOrUsername = it },
             label = { Text("Email o nombre de usuario") },
             modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading,
+            enabled = authState !is AuthUiState.Loading,
             singleLine = true
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -66,15 +65,15 @@ fun LoginScreen(
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
-            enabled = authState !is AuthState.Loading,
+            enabled = authState !is AuthUiState.Loading,
             singleLine = true
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         // Mostrar error si existe
-        if (authState is AuthState.Error) {
+        if (authState is AuthUiState.Error) {
             Text(
-                text = (authState as AuthState.Error).message,
+                text = (authState as AuthUiState.Error).message,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -83,12 +82,12 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                authViewModel.login(emailOrUsername, password)
+                viewModel.login(emailOrUsername, password)
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading
+            enabled = authState !is AuthUiState.Loading
         ) {
-            if (authState is AuthState.Loading) {
+            if (authState is AuthUiState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     color = MaterialTheme.colorScheme.onPrimary
@@ -108,7 +107,7 @@ fun LoginScreen(
                 text = "Regístrate",
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable {
-                    navController.navigate("register")
+                    onNavigateToRegister()
                 }
             )
         }

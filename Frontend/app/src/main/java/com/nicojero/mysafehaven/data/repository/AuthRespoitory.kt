@@ -1,10 +1,11 @@
 package com.nicojero.mysafehaven.data.repository
 
 import com.nicojero.mysafehaven.data.local.AuthDataStore
-import com.nicojero.mysafehaven.data.remote.RetrofitClient
+import com.nicojero.mysafehaven.data.remote.ApiService
 import com.nicojero.mysafehaven.data.remote.dto.LoginRequest
 import com.nicojero.mysafehaven.data.remote.dto.RegisterRequest
 import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
 sealed class AuthResult {
     data class Success(
@@ -17,9 +18,10 @@ sealed class AuthResult {
     data class Error(val message: String) : AuthResult()
 }
 
-class AuthRepository(private val authDataStore: AuthDataStore) {
-
-    private val apiService = RetrofitClient.instance
+class AuthRepository @Inject constructor(
+    private val apiService: ApiService,
+    private val authDataStore: AuthDataStore
+) {
 
     // Verificar si hay sesión activa
     suspend fun hasActiveSession(): Boolean {
@@ -132,7 +134,7 @@ class AuthRepository(private val authDataStore: AuthDataStore) {
     suspend fun verifyToken(): Boolean {
         return try {
             val token = authDataStore.token.first() ?: return false
-            val response = apiService.getCurrentUser("Bearer $token")
+            val response = apiService.getCurrentUser()
             response.isSuccessful
         } catch (e: Exception) {
             false

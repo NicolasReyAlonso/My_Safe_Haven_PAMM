@@ -6,10 +6,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.nicojero.mysafehaven.data.local.AuthDataStore
-import com.nicojero.mysafehaven.data.repository.AuthRepository
 import com.nicojero.mysafehaven.presentation.ui.components.BottomNavItem
 import com.nicojero.mysafehaven.presentation.ui.components.RadarBottomNavigation
 import com.nicojero.mysafehaven.presentation.ui.components.RadarTopBar
@@ -21,20 +20,26 @@ import com.nicojero.mysafehaven.presentation.viewmodel.SessionState
 @Composable
 fun MainScaffold() {
     val navController = rememberNavController()
-    val context = LocalContext.current
 
-    // Inicializar repositorio y ViewModel
-    val authDataStore = remember { AuthDataStore(context) }
-    val authRepository = remember { AuthRepository(authDataStore) }
-    val authViewModel = remember { AuthViewModel(authRepository) }
+    // ✅ Usar hiltViewModel() en lugar de crear instancias manualmente
+    val authViewModel: AuthViewModel = hiltViewModel()
 
     val sessionState by authViewModel.sessionState.collectAsState()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
 
-    // Determinar si mostrar la UI completa
-    val showFullUI = sessionState is SessionState.LoggedIn
+    // Determinar si mostrar la UI completa (solo en pantallas principales)
+    val showFullUI = sessionState is SessionState.LoggedIn &&
+            currentRoute in listOf(
+        Screen.Home.route,
+        Screen.Search.route,
+        Screen.Profile.route,
+        Screen.HavensList.route
+    )
 
     val bottomNavItems = listOf(
         BottomNavItem(Screen.Home.route, Icons.Filled.Home, "Inicio"),
+        BottomNavItem(Screen.HavensList.route, Icons.Filled.Place, "Havens"),
         BottomNavItem(Screen.Search.route, Icons.Filled.Search, "Buscar"),
         BottomNavItem(Screen.Profile.route, Icons.Filled.Person, "Perfil")
     )
@@ -47,7 +52,13 @@ fun MainScaffold() {
                     hasNotifications = false,
                     onNotificationClick = { /* TODO */ },
                     onProfileClick = {
-                        navController.navigate(Screen.Profile.route)
+                        navController.navigate(Screen.Profile.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
@@ -60,7 +71,7 @@ fun MainScaffold() {
     ) { paddingValues ->
         NavigationGraph(
             navController = navController,
-            authViewModel = authViewModel,
+            startDestination = Screen.Splash.route,
             modifier = Modifier.padding(paddingValues)
         )
     }
