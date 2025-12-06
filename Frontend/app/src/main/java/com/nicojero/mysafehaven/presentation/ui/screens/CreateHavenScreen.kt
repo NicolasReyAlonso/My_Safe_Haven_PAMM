@@ -1,19 +1,25 @@
 package com.nicojero.mysafehaven.presentation.ui.screens
 
+import android.Manifest
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenUiState
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun CreateHavenScreen(
     viewModel: HavenViewModel = hiltViewModel(),
@@ -27,9 +33,20 @@ fun CreateHavenScreen(
 
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var isLoadingLocation by remember { mutableStateOf(false) }
 
     val createHavenState by viewModel.createHavenState.collectAsState()
     val havenLimits by viewModel.havenLimits.collectAsState()
+
+    val scope = rememberCoroutineScope()
+
+    // Manejo de permisos de ubicación
+    val locationPermissions = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    )
 
     LaunchedEffect(Unit) {
         viewModel.checkCanCreateHaven()
@@ -123,16 +140,68 @@ fun CreateHavenScreen(
                 enabled = havenLimits?.canCreate == true
             )
 
-            OutlinedTextField(
-                value = latitude,
-                onValueChange = { latitude = it },
-                label = { Text("Latitud") },
+            // Sección de ubicación con botón GPS
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                placeholder = { Text("28.123456") },
-                enabled = havenLimits?.canCreate == true
-            )
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = latitude,
+                    onValueChange = { latitude = it },
+                    label = { Text("Latitud") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    placeholder = { Text("28.123456") },
+                    enabled = havenLimits?.canCreate == true && !isLoadingLocation
+                )
+
+                IconButton(
+                    onClick = {
+                        if (locationPermissions.allPermissionsGranted) {
+                            // Obtener ubicación
+                            isLoadingLocation = true
+                            scope.launch {
+                                try {
+                                    val location = viewModel.getCurrentLocation()
+                                        ?: viewModel.getLastKnownLocation()
+
+                                    if (location != null) {
+                                        latitude = location.latitude.toString()
+                                        longitude = location.longitude.toString()
+                                    } else {
+                                        errorMessage = "No se pudo obtener la ubicación"
+                                        showError = true
+                                    }
+                                } catch (e: Exception) {
+                                    errorMessage = "Error al obtener ubicación: ${e.message}"
+                                    showError = true
+                                } finally {
+                                    isLoadingLocation = false
+                                }
+                            }
+                        } else {
+                            // Solicitar permisos
+                            locationPermissions.launchMultiplePermissionRequest()
+                        }
+                    },
+                    enabled = havenLimits?.canCreate == true && !isLoadingLocation
+                ) {
+                    if (isLoadingLocation) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.MyLocation,
+                            contentDescription = "Obtener ubicación actual",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
 
             OutlinedTextField(
                 value = longitude,
@@ -142,8 +211,17 @@ fun CreateHavenScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 placeholder = { Text("-15.654321") },
-                enabled = havenLimits?.canCreate == true
+                enabled = havenLimits?.canCreate == true && !isLoadingLocation
             )
+
+            // Texto informativo sobre permisos
+            if (!locationPermissions.allPermissionsGranted) {
+                Text(
+                    text = "📍 Toca el ícono de ubicación para permitir acceso al GPS",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
             OutlinedTextField(
                 value = radius,
@@ -188,7 +266,8 @@ fun CreateHavenScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = havenLimits?.canCreate == true &&
-                        createHavenState !is HavenUiState.Loading
+                        createHavenState !is HavenUiState.Loading &&
+                        !isLoadingLocation
             ) {
                 if (createHavenState is HavenUiState.Loading) {
                     CircularProgressIndicator(

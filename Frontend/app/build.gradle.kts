@@ -84,6 +84,11 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.11.0")
 
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+
+    // Accompanist Permissions (para manejar permisos en Compose)
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
     // --- Testing ---
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.6")

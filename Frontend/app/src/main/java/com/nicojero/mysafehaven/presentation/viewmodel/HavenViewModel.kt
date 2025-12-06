@@ -2,6 +2,7 @@ package com.nicojero.mysafehaven.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nicojero.mysafehaven.data.location.LocationManager
 import com.nicojero.mysafehaven.data.repository.HavenRepository
 import com.nicojero.mysafehaven.data.repository.HavenResult
 import com.nicojero.mysafehaven.domain.model.Haven
@@ -23,7 +24,8 @@ sealed class HavenUiState {
 
 @HiltViewModel
 class HavenViewModel @Inject constructor(
-    private val havenRepository: HavenRepository
+    private val havenRepository: HavenRepository,
+    private val locationManager: LocationManager
 ) : ViewModel() {
 
     // ========== HAVENS STATE ==========
@@ -172,6 +174,12 @@ class HavenViewModel @Inject constructor(
             }
         }
     }
+
+    // ========== LOCATION ==========
+
+    suspend fun getCurrentLocation() = locationManager.getCurrentLocation()
+
+    suspend fun getLastKnownLocation() = locationManager.getLastKnownLocation()
 
     // ========== RESET STATES ==========
 
