@@ -13,7 +13,7 @@ from extensions import db
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:Nicololo@db:5432/mysafehaven"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'tu-clave-secreta-super-segura-cambiala'
+app.config['JWT_SECRET_KEY'] = 'Nicolololololololololololo'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=30)
 
 # Inicializa extensiones con ESTA app
