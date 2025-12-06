@@ -1,4 +1,3 @@
-
 # app.py
 from flask import Flask, jsonify, request
 from datetime import timedelta
@@ -7,9 +6,9 @@ from flask_jwt_extended import (
     create_access_token, jwt_required, get_jwt_identity, JWTManager
 )
 from flask_migrate import Migrate
-from flask_socketio import SocketIO, join_room, emit  # <-- IMPORTA join_room y emit
+from flask_socketio import SocketIO, join_room, emit
 
-from extensions import db  # <-- USA la MISMA instancia de extensions.py
+from extensions import db
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:Nicololo@db:5432/mysafehaven"
@@ -62,7 +61,8 @@ def register():
     db.session.add(user)
     db.session.commit()
     
-    access_token = create_access_token(identity=user.id)
+    # ✅ CAMBIO AQUÍ: Convertir a string
+    access_token = create_access_token(identity=str(user.id))
     
     return jsonify({
         "message": "Usuario registrado exitosamente",
@@ -89,7 +89,8 @@ def login():
     if not user or not user.check_password(data['password']):
         return jsonify({"error": "Credenciales inválidas"}), 401
     
-    access_token = create_access_token(identity=user.id)
+    # ✅ CAMBIO AQUÍ: Convertir a string
+    access_token = create_access_token(identity=str(user.id))
     
     return jsonify({
         "message": "Login exitoso",
@@ -111,7 +112,8 @@ def get_user(user_id):
 @app.route('/users/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
-    current_user_id = get_jwt_identity()
+    # ✅ CAMBIO AQUÍ: Convertir a int
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
@@ -122,7 +124,8 @@ def get_current_user():
 @app.route('/users/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_user(user_id):
-    current_user_id = get_jwt_identity()
+    # ✅ CAMBIO AQUÍ: Convertir a int
+    current_user_id = int(get_jwt_identity())
     
     if current_user_id != user_id:
         return jsonify({"error": "No autorizado"}), 403
@@ -163,7 +166,8 @@ def update_user(user_id):
 @app.route('/havens/can-create', methods=['GET'])
 @jwt_required()
 def can_create_haven():
-    current_user_id = get_jwt_identity()
+    # ✅ CAMBIO AQUÍ: Convertir a int
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     return jsonify({
@@ -177,7 +181,8 @@ def can_create_haven():
 @app.route('/havens', methods=['POST'])
 @jwt_required()
 def create_haven():
-    current_user_id = get_jwt_identity()
+    # ✅ CAMBIO AQUÍ: Convertir a int
+    current_user_id = int(get_jwt_identity())
     data = request.get_json()
     
     if not all(k in data for k in ['name', 'latitude', 'longitude', 'radius']):
@@ -219,7 +224,8 @@ def get_haven(haven_id):
 @app.route('/havens', methods=['GET'])
 @jwt_required()
 def get_all_havens():
-    current_user_id = get_jwt_identity()
+    # ✅ CAMBIO AQUÍ: Convertir a int
+    current_user_id = int(get_jwt_identity())
     havens = Haven.query.filter_by(user_id=current_user_id).all()
     
     return jsonify([h.to_dict() for h in havens]), 200
@@ -227,7 +233,8 @@ def get_all_havens():
 @app.route('/havens/<int:haven_id>', methods=['PUT'])
 @jwt_required()
 def update_haven(haven_id):
-    current_user_id = get_jwt_identity()
+    # ✅ CAMBIO AQUÍ: Convertir a int
+    current_user_id = int(get_jwt_identity())
     haven = Haven.query.get(haven_id)
     
     if not haven:
@@ -250,7 +257,8 @@ def update_haven(haven_id):
 @app.route('/havens/<int:haven_id>', methods=['DELETE'])
 @jwt_required()
 def delete_haven(haven_id):
-    current_user_id = get_jwt_identity()
+    # ✅ CAMBIO AQUÍ: Convertir a int
+    current_user_id = int(get_jwt_identity())
     haven = Haven.query.get(haven_id)
     
     if not haven:
@@ -269,7 +277,8 @@ def delete_haven(haven_id):
 @app.route('/havens/<int:haven_id>/posts', methods=['POST'])
 @jwt_required()
 def create_post(haven_id):
-    current_user_id = get_jwt_identity()
+    # ✅ CAMBIO AQUÍ: Convertir a int
+    current_user_id = int(get_jwt_identity())
     haven = Haven.query.get(haven_id)
     
     if not haven:
@@ -305,7 +314,8 @@ def get_posts(haven_id):
 @app.route('/havens/<int:haven_id>/messages', methods=['POST'])
 @jwt_required()
 def create_message(haven_id):
-    current_user_id = get_jwt_identity()
+    # ✅ CAMBIO AQUÍ: Convertir a int
+    current_user_id = int(get_jwt_identity())
     haven = Haven.query.get(haven_id)
     
     if not haven:
@@ -357,7 +367,5 @@ def handle_join_haven(data):
         emit('joined', {'haven_id': haven_id})
         print(f'Cliente unido a haven_{haven_id}')
 
-# ... (el resto de tus rutas y handlers tal como los tienes)
-# Al final:
 if __name__ == '__main__':
     socketio.run(app, debug=True, host="0.0.0.0", port=5050)
