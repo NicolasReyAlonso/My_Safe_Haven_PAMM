@@ -24,10 +24,11 @@ import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HavenDetailScreen(
-    haven: Haven,
+    havenId: Int,  // Cambiado: recibir el ID en lugar del objeto
     viewModel: HavenViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
+    val havens by viewModel.havens.collectAsState()
     val posts by viewModel.posts.collectAsState()
     val postsState by viewModel.postsState.collectAsState()
     val createPostState by viewModel.createPostState.collectAsState()
@@ -35,8 +36,22 @@ fun HavenDetailScreen(
     var showCreatePostDialog by remember { mutableStateOf(false) }
     var postContent by remember { mutableStateOf("") }
 
-    LaunchedEffect(haven.id) {
-        viewModel.loadPosts(haven.id)
+    // Buscar el haven por ID
+    val haven = havens.find { it.id == havenId }
+
+    // Cargar havens si la lista está vacía
+    LaunchedEffect(Unit) {
+        if (havens.isEmpty()) {
+            viewModel.loadHavens()
+        }
+    }
+
+    // Cargar posts cuando tengamos el haven
+    LaunchedEffect(haven) {
+        haven?.let {
+            viewModel.selectHaven(it)
+            viewModel.loadPosts(it.id)
+        }
     }
 
     LaunchedEffect(createPostState) {
@@ -45,6 +60,27 @@ fun HavenDetailScreen(
             postContent = ""
             viewModel.resetCreatePostState()
         }
+    }
+
+    // Mostrar loading mientras cargamos el haven
+    if (haven == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CircularProgressIndicator()
+                Text(
+                    text = "Cargando haven...",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+        }
+        return
     }
 
     Scaffold(
@@ -112,7 +148,7 @@ fun HavenDetailScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Divider()
+                    HorizontalDivider()
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -151,10 +187,19 @@ fun HavenDetailScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = (postsState as HavenUiState.Error).message,
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = (postsState as HavenUiState.Error).message,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Button(onClick = { viewModel.loadPosts(haven.id) }) {
+                                Text("Reintentar")
+                            }
+                        }
                     }
                 }
                 else -> {

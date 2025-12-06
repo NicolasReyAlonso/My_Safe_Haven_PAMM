@@ -1,13 +1,7 @@
 package com.nicojero.mysafehaven.presentation.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -138,37 +132,13 @@ fun NavigationGraph(
             val havenViewModel: HavenViewModel = hiltViewModel()
             val havenId = backStackEntry.arguments?.getInt("havenId") ?: return@composable
 
-            // Cargar el haven cuando se entra a la pantalla
-            LaunchedEffect(havenId) {
-                // Buscar el haven en la lista actual
-                havenViewModel.havens.value.find { it.id == havenId }?.let { haven ->
-                    havenViewModel.selectHaven(haven)
-                } ?: run {
-                    // Si no está en la lista, cargar todos y luego seleccionar
-                    havenViewModel.loadHavens()
+            HavenDetailScreen(
+                havenId = havenId,
+                viewModel = havenViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
-            }
-
-            // Obtener el haven seleccionado
-            val selectedHaven by havenViewModel.selectedHaven.collectAsState()
-
-            selectedHaven?.let { haven ->
-                HavenDetailScreen(
-                    haven = haven,
-                    viewModel = havenViewModel,
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    }
-                )
-            } ?: run {
-                // Mostrar loading mientras carga
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
+            )
         }
     }
 }
