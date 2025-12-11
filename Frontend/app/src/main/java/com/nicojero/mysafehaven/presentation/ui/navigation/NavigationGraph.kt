@@ -1,7 +1,6 @@
 package com.nicojero.mysafehaven.presentation.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -9,7 +8,15 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.nicojero.mysafehaven.presentation.ui.screens.*
+import com.nicojero.mysafehaven.presentation.ui.screens.CreateHavenScreen
+import com.nicojero.mysafehaven.presentation.ui.screens.HavenDetailScreen
+import com.nicojero.mysafehaven.presentation.ui.screens.HavensListScreen
+import com.nicojero.mysafehaven.presentation.ui.screens.HomeScreen
+import com.nicojero.mysafehaven.presentation.ui.screens.LoginScreen
+import com.nicojero.mysafehaven.presentation.ui.screens.ProfileScreen
+import com.nicojero.mysafehaven.presentation.ui.screens.RegisterScreen
+import com.nicojero.mysafehaven.presentation.ui.screens.SearchScreen
+import com.nicojero.mysafehaven.presentation.ui.screens.SplashScreen
 import com.nicojero.mysafehaven.presentation.viewmodel.AuthViewModel
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
 

@@ -30,9 +30,6 @@ fun SplashScreen(
             else -> {
                 // Si aún está cargando, esperar más
                 delay(1000)
-                if (sessionState is SessionState.LoggedOut) {
-                    onNavigateToLogin()
-                }
             }
         }
     }

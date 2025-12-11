@@ -4,8 +4,6 @@ import android.content.Context
 import com.nicojero.mysafehaven.data.local.AuthDataStore
 import com.nicojero.mysafehaven.data.remote.ApiService
 import com.nicojero.mysafehaven.data.remote.RetrofitClient
-import com.nicojero.mysafehaven.data.repository.AuthRepository
-import com.nicojero.mysafehaven.data.repository.HavenRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

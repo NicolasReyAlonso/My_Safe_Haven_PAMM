@@ -25,17 +25,26 @@ fun MainScaffold() {
     val authViewModel: AuthViewModel = hiltViewModel()
 
     val sessionState by authViewModel.sessionState.collectAsState()
+
+    val startDestination = when (sessionState) {
+        is SessionState.Loading -> Screen.Splash.route
+        is SessionState.LoggedIn -> Screen.Home.route
+        is SessionState.LoggedOut -> Screen.Login.route
+        else -> { Screen.Splash.route }
+    }
+
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
 
     // Determinar si mostrar la UI completa (solo en pantallas principales)
-    val showFullUI = sessionState is SessionState.LoggedIn &&
-            currentRoute in listOf(
-        Screen.Home.route,
-        Screen.Search.route,
-        Screen.Profile.route,
-        Screen.HavensList.route
+    val fullscreenRoutes = listOf(
+            Screen.Home.route,
+            Screen.Search.route,
+            Screen.Profile.route,
+            Screen.HavensList.route
     )
+
+    val showFullUI = currentRoute != null && currentRoute in fullscreenRoutes
 
     val bottomNavItems = listOf(
         BottomNavItem(Screen.Home.route, Icons.Filled.Home, "Inicio"),
@@ -71,7 +80,7 @@ fun MainScaffold() {
     ) { paddingValues ->
         NavigationGraph(
             navController = navController,
-            startDestination = Screen.Splash.route,
+            startDestination = startDestination as String,
             modifier = Modifier.padding(paddingValues)
         )
     }

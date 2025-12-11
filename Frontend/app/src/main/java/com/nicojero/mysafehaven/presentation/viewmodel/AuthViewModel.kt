@@ -69,16 +69,16 @@ class AuthViewModel @Inject constructor(  // ✅ Agregar @Inject
 
             when (val result = authRepository.login(emailOrUsername, password)) {
                 is AuthResult.Success -> {
-                    _authState.value = AuthUiState.Success
                     _sessionState.value = SessionState.LoggedIn(
                         userId = result.userId,
                         username = result.username,
                         email = result.email
                     )
+                    _authState.value = AuthUiState.Success
                 }
                 is AuthResult.Error -> {
-                    _authState.value = AuthUiState.Error(result.message)
                     _sessionState.value = SessionState.LoggedOut
+                    _authState.value = AuthUiState.Error(result.message)
                 }
             }
         }
