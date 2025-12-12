@@ -11,6 +11,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./Backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mysafehaven"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   backend:
     build: ./Backend/
@@ -20,11 +26,13 @@ services:
       POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Nicololo
-      POSTGRES_DB: midb
+      POSTGRES_DB: mysafehaven
     ports:
       - "5050:5050"
+    
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:

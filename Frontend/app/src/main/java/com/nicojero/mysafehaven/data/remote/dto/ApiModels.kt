@@ -2,7 +2,7 @@ package com.nicojero.mysafehaven.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 
-// Request DTOs
+// ========== AUTH DTOs ==========
 data class RegisterRequest(
     val username: String,
     val mail: String,
@@ -17,7 +17,6 @@ data class LoginRequest(
     val password: String
 )
 
-// Response DTOs
 data class AuthResponse(
     val message: String,
     @SerializedName("access_token")
@@ -33,7 +32,6 @@ data class UserDto(
     val profileImagePath: String?,
     val pro: Boolean? = false
 )
-
 
 data class UpdateUserRequest(
     val username: String? = null,
@@ -88,6 +86,46 @@ data class CanCreateHavenResponse(
     val maxHavens: Any, // Puede ser Int o "ilimitado"
     @SerializedName("remaining_havens")
     val remainingHavens: Any // Puede ser Int o "ilimitado"
+)
+
+// ========== NEARBY HAVENS & SUBSCRIPTION DTOs ==========
+data class NearbyHavensRequest(
+    val latitude: Double,
+    val longitude: Double
+)
+
+data class NearbyHavenDto(
+    @SerializedName("haven_id")
+    val havenId: Int,
+    @SerializedName("user_id")
+    val userId: Int,
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val radius: Double,
+    @SerializedName("distance_meters")
+    val distanceMeters: Double,
+    @SerializedName("is_subscribed")
+    val isSubscribed: Boolean,
+    @SerializedName("owner_username")
+    val ownerUsername: String
+)
+
+data class NearbyHavensResponse(
+    val count: Int,
+    val havens: List<NearbyHavenDto>
+)
+
+data class SubscriptionResponse(
+    val message: String,
+    val subscription: SubscriptionDto? = null
+)
+
+data class SubscriptionDto(
+    @SerializedName("user_id")
+    val userId: Int,
+    @SerializedName("haven_id")
+    val havenId: Int
 )
 
 // ========== POST DTOs ==========
