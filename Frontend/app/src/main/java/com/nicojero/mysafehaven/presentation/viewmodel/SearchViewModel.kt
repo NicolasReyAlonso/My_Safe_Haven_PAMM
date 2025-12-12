@@ -61,22 +61,29 @@ class SearchViewModel @Inject constructor(
 
             val location = locationManager.getCurrentLocation()
             if (location != null) {
-                _currentLocation.value = location
+                _currentLocation.value = UserLocation(
+                    latitude = location.latitude,
+                    longitude = location.longitude
+                )
                 loadNearbyHavens(location.latitude, location.longitude)
             } else {
                 _uiState.value = SearchUiState.Error("No se pudo obtener la ubicación")
             }
+
         }
     }
 
     private fun loadNearbyHavens(latitude: Double, longitude: Double) {
         viewModelScope.launch {
             when (val result = havenRepository.getNearbyHavens(latitude, longitude)) {
-                is Result.Success -> {
+                is HavenResult.Success -> {
                     _uiState.value = SearchUiState.Success(result.data)
                 }
-                is Result.Error -> {
+                is HavenResult.Error -> {
                     _uiState.value = SearchUiState.Error(result.message)
+                }
+                else -> {
+                    _uiState.value = SearchUiState.Error("Resultado desconocido")
                 }
             }
         }
@@ -85,14 +92,14 @@ class SearchViewModel @Inject constructor(
     fun subscribeToHaven(havenId: Int) {
         viewModelScope.launch {
             when (val result = havenRepository.subscribeToHaven(havenId)) {
-                is Result.Success -> {
+                is HavenResult.Success -> {
                     _subscriptionMessage.emit(result.data)
                     // Recargar havens para actualizar el estado de suscripción
                     _currentLocation.value?.let {
                         loadNearbyHavens(it.latitude, it.longitude)
                     }
                 }
-                is Result.Error -> {
+                is HavenResult.Error -> {
                     _subscriptionMessage.emit(result.message)
                 }
             }
@@ -102,13 +109,13 @@ class SearchViewModel @Inject constructor(
     fun unsubscribeFromHaven(havenId: Int) {
         viewModelScope.launch {
             when (val result = havenRepository.unsubscribeFromHaven(havenId)) {
-                is Result.Success -> {
+                is HavenResult.Success -> {
                     _subscriptionMessage.emit(result.data)
                     _currentLocation.value?.let {
                         loadNearbyHavens(it.latitude, it.longitude)
                     }
                 }
-                is Result.Error -> {
+                is HavenResult.Error -> {
                     _subscriptionMessage.emit(result.message)
                 }
             }
@@ -119,15 +126,15 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             _havenDetails.value = HavenDetailsState(haven = haven, isLoading = true)
 
-            when (val result = havenRepository.getHavenPosts(haven.id)) {
-                is Result.Success -> {
+            when (val result = havenRepository.getPosts(haven.id)) {
+                is HavenResult.Success -> {
                     _havenDetails.value = HavenDetailsState(
                         haven = haven,
                         posts = result.data,
                         isLoading = false
                     )
                 }
-                is Result.Error -> {
+                is HavenResult.Error -> {
                     _havenDetails.value = HavenDetailsState(
                         haven = haven,
                         isLoading = false,
