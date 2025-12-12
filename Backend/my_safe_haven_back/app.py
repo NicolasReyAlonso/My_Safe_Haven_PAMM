@@ -7,7 +7,7 @@ from flask_jwt_extended import (
 )
 from flask_migrate import Migrate
 from flask_socketio import SocketIO, join_room, emit
-
+import math
 from extensions import db
 
 app = Flask(__name__)
@@ -23,7 +23,7 @@ jwt = JWTManager(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Importa los modelos DESPUÉS de init_app
-from models import User, Haven, HavenPost, ChatMessage
+from models import User, Haven, HavenPost, ChatMessage, Subscription
 
 # Si no usas 'flask db upgrade' aún, crea tablas (útil en desarrollo)
 with app.app_context():
@@ -31,6 +31,20 @@ with app.app_context():
 
 # Almacenar usuarios conectados: {user_id: [session_ids]}
 active_connections = {}
+
+# ====================== UTILIDADES ==============================
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """Devuelve la distancia en metros entre dos coordenadas"""
+    R = 6371000  # Radio de la Tierra en metros
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+
+    a = math.sin(dphi/2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda/2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+
+    return R * c
 
 # ==================== RUTAS DE AUTENTICACIÓN ====================
 
@@ -272,6 +286,36 @@ def delete_haven(haven_id):
     
     return jsonify({"message": "Haven eliminado"}), 200
 
+@app.route('/havens/nearby', methods=['POST'])
+@jwt_required()
+def get_nearby_havens():
+    data = request.get_json()
+
+    if not data.get('latitude') or not data.get('longitude'):
+        return jsonify({"error": "Se requiere latitude y longitude"}), 400
+
+    user_lat = float(data['latitude'])
+    user_lon = float(data['longitude'])
+
+    # Obtener todos los havens
+    havens = Haven.query.all()
+    inside_havens = []
+
+    for haven in havens:
+        dist = haversine_distance(user_lat, user_lon, haven.latitude, haven.longitude)
+
+        if dist <= haven.radius:
+            inside_havens.append({
+                **haven.to_dict(),
+                "distance_meters": round(dist, 2)
+            })
+
+    return jsonify({
+        "count": len(inside_havens),
+        "havens": inside_havens
+    }), 200
+
+
 # ==================== POSTS ====================
 
 @app.route('/havens/<int:haven_id>/posts', methods=['POST'])
@@ -310,6 +354,54 @@ def get_posts(haven_id):
     return jsonify([p.to_dict() for p in posts]), 200
 
 # ==================== MENSAJES ====================
+@app.route('/havens/<int:haven_id>/subscribe', methods=['POST'])
+@jwt_required()
+def subscribe_to_haven(haven_id):
+    current_user_id = int(get_jwt_identity())
+
+    haven = Haven.query.get(haven_id)
+    if not haven:
+        return jsonify({"error": "Haven no encontrado"}), 404
+
+    # Verificar si ya existe la suscripción
+    existing = Subscription.query.filter_by(user_id=current_user_id, haven_id=haven_id).first()
+    if existing:
+        return jsonify({"message": "Ya estás suscrito a este Haven"}), 200
+
+    subscription = Subscription(
+        user_id=current_user_id,
+        haven_id=haven_id
+    )
+
+    db.session.add(subscription)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Suscripción realizada con éxito",
+        "subscription": {
+            "user_id": current_user_id,
+            "haven_id": haven_id
+        }
+    }), 201
+
+@app.route('/havens/<int:haven_id>/unsubscribe', methods=['DELETE'])
+@jwt_required()
+def unsubscribe_from_haven(haven_id):
+    current_user_id = int(get_jwt_identity())
+
+    subscription = Subscription.query.filter_by(
+        user_id=current_user_id,
+        haven_id=haven_id
+    ).first()
+
+    if not subscription:
+        return jsonify({"error": "No estás suscrito a este Haven"}), 404
+
+    db.session.delete(subscription)
+    db.session.commit()
+
+    return jsonify({"message": "Desuscripción exitosa"}), 200
+
 
 @app.route('/havens/<int:haven_id>/messages', methods=['POST'])
 @jwt_required()

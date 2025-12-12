@@ -14,6 +14,7 @@ sealed class HavenResult<out T> {
     data class Error(val message: String, val code: Int? = null) : HavenResult<Nothing>()
 }
 
+
 class HavenRepository @Inject constructor(
     private val apiService: ApiService
 ) {
@@ -129,6 +130,52 @@ class HavenRepository @Inject constructor(
         }
     }
 
+    // ========== NEARBY HAVENS & SUBSCRIPTIONS ==========
+
+    suspend fun getNearbyHavens(latitude: Double, longitude: Double): HavenResult<List<Haven>> {
+        return try {
+            val request = NearbyHavensRequest(latitude, longitude)
+            val response = apiService.getNearbyHavens(request)
+
+            if (response.isSuccessful && response.body() != null) {
+                val havens = response.body()!!.havens.map { it.toNearbyDomainModel() }
+                HavenResult.Success(havens)
+            } else {
+                HavenResult.Error("Error al obtener havens cercanos", response.code())
+            }
+        } catch (e: Exception) {
+            HavenResult.Error(e.message ?: "Error de conexión")
+        }
+    }
+
+    suspend fun subscribeToHaven(havenId: Int): HavenResult<String> {
+        return try {
+            val response = apiService.subscribeToHaven(havenId)
+
+            if (response.isSuccessful && response.body() != null) {
+                HavenResult.Success(response.body()!!.message)
+            } else {
+                HavenResult.Error("Error al suscribirse", response.code())
+            }
+        } catch (e: Exception) {
+            HavenResult.Error(e.message ?: "Error de conexión")
+        }
+    }
+
+    suspend fun unsubscribeFromHaven(havenId: Int): HavenResult<String> {
+        return try {
+            val response = apiService.unsubscribeFromHaven(havenId)
+
+            if (response.isSuccessful && response.body() != null) {
+                HavenResult.Success(response.body()!!.message)
+            } else {
+                HavenResult.Error("Error al desuscribirse", response.code())
+            }
+        } catch (e: Exception) {
+            HavenResult.Error(e.message ?: "Error de conexión")
+        }
+    }
+
     // ========== POST OPERATIONS ==========
 
     suspend fun createPost(havenId: Int, content: String): HavenResult<Post> {
@@ -170,6 +217,18 @@ class HavenRepository @Inject constructor(
         latitude = latitude,
         longitude = longitude,
         radius = radius
+    )
+
+    private fun NearbyHavenDto.toNearbyDomainModel() = Haven(
+        id = havenId,
+        userId = userId,
+        name = name,
+        latitude = latitude,
+        longitude = longitude,
+        radius = radius,
+        distanceMeters = distanceMeters,
+        isSubscribed = isSubscribed,
+        ownerUsername = ownerUsername
     )
 
     private fun PostDto.toDomainModel() = Post(

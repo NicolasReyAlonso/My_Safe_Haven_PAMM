@@ -1,23 +1,18 @@
 package com.nicojero.mysafehaven.data.remote
 
 import com.nicojero.mysafehaven.data.remote.dto.*
-import com.nicojero.mysafehaven.domain.model.Notification
 import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
 
+    // ========== AUTH ENDPOINTS ==========
     @POST("register")
     suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
 
     @POST("login")
     suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
 
-    @GET("users/me")
-    suspend fun getCurrentUser(@Header("Authorization") token: String): Response<UserDto>
-
-    @GET("notifications")
-    suspend fun getNotifications(): Response<List<Notification>>
     @GET("users/me")
     suspend fun getCurrentUser(): Response<UserDto>
 
@@ -52,6 +47,16 @@ interface ApiService {
     @DELETE("havens/{haven_id}")
     suspend fun deleteHaven(@Path("haven_id") havenId: Int): Response<Map<String, String>>
 
+    // ========== NEARBY HAVENS & SUBSCRIPTIONS ==========
+    @POST("havens/nearby")
+    suspend fun getNearbyHavens(@Body request: NearbyHavensRequest): Response<NearbyHavensResponse>
+
+    @POST("havens/{haven_id}/subscribe")
+    suspend fun subscribeToHaven(@Path("haven_id") havenId: Int): Response<SubscriptionResponse>
+
+    @DELETE("havens/{haven_id}/unsubscribe")
+    suspend fun unsubscribeFromHaven(@Path("haven_id") havenId: Int): Response<SubscriptionResponse>
+
     // ========== POST ENDPOINTS ==========
     @POST("havens/{haven_id}/posts")
     suspend fun createPost(
@@ -72,4 +77,3 @@ interface ApiService {
     @GET("havens/{haven_id}/messages")
     suspend fun getMessages(@Path("haven_id") havenId: Int): Response<List<ChatMessageDto>>
 }
-

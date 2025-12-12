@@ -6,8 +6,13 @@ data class Haven(
     val name: String,
     val latitude: Double,
     val longitude: Double,
-    val radius: Double
+    val radius: Double,
+    // Nuevos campos para havens cercanos
+    val distanceMeters: Double? = null,
+    val isSubscribed: Boolean = false,
+    val ownerUsername: String? = null
 )
+
 data class HavenLimits(
     val canCreate: Boolean,
     val isPro: Boolean,

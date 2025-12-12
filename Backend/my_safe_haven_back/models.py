@@ -27,6 +27,10 @@ class User(db.Model):
             return True
         return len(self.havens) < 3
     
+    def is_subscribed_to(self, haven_id):
+        return any(sub.haven_id == haven_id for sub in self.subscriptions)
+
+    
     def to_dict(self):
         return {
             'id': self.id,
@@ -49,6 +53,10 @@ class Haven(db.Model):
     
     posts = db.relationship('HavenPost', backref='haven', lazy=True, cascade='all, delete-orphan')
     messages = db.relationship('ChatMessage', backref='haven', lazy=True, cascade='all, delete-orphan')
+
+    def subscribers_count(self):
+        return len(self.subscriptions)
+
     
     def to_dict(self):
         return {
@@ -93,4 +101,30 @@ class ChatMessage(db.Model):
             'content': self.content,
             'date': self.date.isoformat(),
             'username': self.user.username
+        }
+    
+class Subscription(db.Model):
+    __tablename__ = 'subscriptions'
+
+    subscription_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    haven_id = db.Column(db.Integer, db.ForeignKey('havens.haven_id', ondelete='CASCADE'), nullable=False)
+    subscribed_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    # Relaciones
+    user = db.relationship('User', backref=db.backref('subscriptions', lazy=True, cascade='all, delete-orphan'))
+    haven = db.relationship('Haven', backref=db.backref('subscriptions', lazy=True, cascade='all, delete-orphan'))
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'haven_id', name='unique_user_haven_subscription'),
+    )
+
+    def to_dict(self):
+        return {
+            'subscription_id': self.subscription_id,
+            'user_id': self.user_id,
+            'haven_id': self.haven_id,
+            'subscribed_at': self.subscribed_at.isoformat(),
+            'username': self.user.username,
+            'haven_name': self.haven.name
         }
