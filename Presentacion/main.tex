@@ -1,0 +1,98 @@
+\documentclass[aspectratio=169]{beamer}
+
+% --- Fuentes estilo Keynote ---
+\usepackage[sfdefault]{FiraSans}
+% \usepackage[default]{lato}  % Alternativa
+
+\usepackage{xcolor}
+
+% --- Nueva paleta nude + tonos tierra ---
+\definecolor{CreamBG}{HTML}{F7F2EC}   % Beige-nude cálido
+\definecolor{BrownDeep}{HTML}{4E3B31} % Marrón profundo, elegante
+\definecolor{BrownText}{HTML}{5C4A3F} % Marrón suave para el texto
+\definecolor{BrownAccent}{HTML}{C19A6B} % Marrón-dorado natural
+\definecolor{SandLight}{HTML}{D8C9B6} % Arena claro para pie / detalles
+
+% --- Eliminar decoraciones Beamer ---
+\usetheme{default}
+\usecolortheme{default}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\raise1.5pt\hbox{\small\textbullet}}
+\setbeamertemplate{itemize subitem}{\raise1pt\hbox{\tiny\textbullet}}
+
+% Fondo general
+\setbeamercolor{background canvas}{bg=CreamBG}
+
+% --- Títulos estilo Keynote en marrón ---
+\setbeamercolor{title}{fg=BrownDeep}
+\setbeamerfont{title}{size=\Huge,series=\bfseries}
+
+\setbeamercolor{frametitle}{fg=BrownDeep}
+\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
+
+% Template del título de frame (centrado, limpio)
+\setbeamertemplate{frametitle}{
+    \begin{center}
+        \vspace{0.4cm}
+        \insertframetitle
+        \vspace{0.4cm}
+    \end{center}
+}
+
+% Texto normal en marrón suave
+\setbeamercolor{normal text}{fg=BrownText}
+\setbeamerfont{normal text}{size=\large}
+
+% Bullets marrones
+\setbeamercolor{itemize item}{fg=BrownDeep}
+\setbeamercolor{itemize subitem}{fg=BrownDeep}
+
+% --- Pie estilo Keynote nude ---
+\setbeamertemplate{footline}{
+    \begin{center}
+        \vspace{0.15cm}
+        {\color{SandLight}\footnotesize \insertshorttitle\hspace{1em}|\hspace{1em}\insertframenumber}
+        \vspace{0.25cm}
+    \end{center}
+}
+
+% --- Datos de la presentación ---
+\title[Mi Presentación]{Mi Presentación Minimalista Estilo Keynote}
+\author{Nicolás Rey Alonso}
+\institute{Departamento de Investigación \\ Universidad Tecnológica}
+\date{\today}
+
+\begin{document}
+
+% --- Slide de título tipo Keynote ---
+{
+\setbeamertemplate{footline}{}
+\begin{frame}
+    \vspace*{2cm}
+    \centering
+    {\Huge\bfseries Mi Presentación Estilo Keynote\\[0.3cm]}
+    {\large Nicolás Rey Alonso}\\[0.2cm]
+    {\small \today}
+\end{frame}
+}
+
+% --- Ejemplo de slide ---
+\begin{frame}{Temas Clave}
+    \begin{itemize}
+        \item Introducción y planteamiento del problema.
+        \item Metodología y proceso.
+        \item Resultados esenciales.
+        \item Conclusiones y análisis final.
+    \end{itemize}
+\end{frame}
+
+% --- Slide de frase estilo keynote ---
+\begin{frame}
+    \centering
+    \vspace{1.5cm}
+    {\Large\color{BrownDeep} “La simplicidad es la máxima sofisticación.”}\\[0.2cm]
+    {\small\color{BrownText} — Leonardo da Vinci}
+\end{frame}
+
+\end{document}
