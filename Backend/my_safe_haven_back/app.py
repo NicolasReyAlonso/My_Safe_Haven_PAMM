@@ -1,5 +1,6 @@
 # app.py
-from flask import Flask, jsonify, request
+import os
+from flask import Flask, jsonify, request, send_from_directory
 from datetime import timedelta
 
 from flask_jwt_extended import (
@@ -9,12 +10,16 @@ from flask_migrate import Migrate
 from flask_socketio import SocketIO, join_room, emit
 import math
 from extensions import db
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:Nicololo@db:5432/mysafehaven"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'Nicolololololololololololo'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=30)
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 # Inicializa extensiones con ESTA app
 db.init_app(app)
