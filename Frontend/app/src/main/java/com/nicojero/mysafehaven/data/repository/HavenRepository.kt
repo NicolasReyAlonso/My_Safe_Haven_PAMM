@@ -2,6 +2,7 @@ package com.nicojero.mysafehaven.data.repository
 
 import com.nicojero.mysafehaven.data.remote.ApiService
 import com.nicojero.mysafehaven.data.remote.dto.*
+import com.nicojero.mysafehaven.domain.model.ChatMessage
 import com.nicojero.mysafehaven.domain.model.Haven
 import com.nicojero.mysafehaven.domain.model.HavenLimits
 import com.nicojero.mysafehaven.domain.model.Post
@@ -238,6 +239,15 @@ class HavenRepository @Inject constructor(
         date = parseDate(date)
     )
 
+    private fun ChatMessageDto.toDomainModel() = ChatMessage(
+        id = messageId,
+        havenId = havenId,
+        userId = userId,
+        username = username,
+        content = content,
+        date = parseDate(date)
+    )
+
     private fun parseDate(dateStr: String): LocalDateTime {
         return try {
             LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_DATE_TIME)
@@ -245,4 +255,40 @@ class HavenRepository @Inject constructor(
             LocalDateTime.now()
         }
     }
+
+    suspend fun getMessages(havenId: Int): HavenResult<List<ChatMessage>> {
+        return try {
+            val response = apiService.getMessages(havenId)
+
+            if (response.isSuccessful && response.body() != null) {
+                val messages = response.body()!!.map { it.toDomainModel() }
+                HavenResult.Success(messages)
+            } else {
+                HavenResult.Error("Error al obtener mensajes", response.code())
+            }
+        } catch (e: Exception) {
+            HavenResult.Error(e.message ?: "Error de conexión")
+        }
+    }
+
+    suspend fun sendMessage(
+        havenId: Int,
+        content: String
+    ): HavenResult<ChatMessage> {
+        return try {
+            val request = CreateMessageRequest(content)
+            val response = apiService.sendMessage(havenId, request)
+
+            if (response.isSuccessful && response.body() != null) {
+                HavenResult.Success(
+                    response.body()!!.chatMessage.toDomainModel()
+                )
+            } else {
+                HavenResult.Error("Error al enviar mensaje", response.code())
+            }
+        } catch (e: Exception) {
+            HavenResult.Error(e.message ?: "Error de conexión")
+        }
+    }
+
 }

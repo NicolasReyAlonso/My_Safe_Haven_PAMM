@@ -1,33 +1,96 @@
 // presentation/ui/screens/SearchScreen.kt
 package com.nicojero.mysafehaven.presentation.ui.screens
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocationOff
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.LocationSearching
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nicojero.mysafehaven.domain.model.Haven
 import com.nicojero.mysafehaven.domain.model.Post
-import com.nicojero.mysafehaven.presentation.viewmodel.SearchViewModel
+import com.nicojero.mysafehaven.presentation.ui.components.ChatBubble
+import com.nicojero.mysafehaven.presentation.viewmodel.AuthViewModel
+import com.nicojero.mysafehaven.presentation.viewmodel.HavenDetailsState
+import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
 import com.nicojero.mysafehaven.presentation.viewmodel.SearchUiState
+import com.nicojero.mysafehaven.presentation.viewmodel.SearchViewModel
+import com.nicojero.mysafehaven.presentation.viewmodel.SessionState
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun SearchScreen(
@@ -37,6 +100,10 @@ fun SearchScreen(
     val havenDetails by viewModel.havenDetails.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    var selectedHavenTab by rememberSaveable { mutableIntStateOf(0) }
+    val havenViewModel: HavenViewModel = hiltViewModel()
+    val authViewModel: AuthViewModel = hiltViewModel()
 
     // Escuchar mensajes de suscripción
     LaunchedEffect(Unit) {
@@ -122,8 +189,15 @@ fun SearchScreen(
                 ) + fadeOut()
             ) {
                 HavenDetailsModal(
-                    havenDetails = havenDetails,
-                    onDismiss = { viewModel.clearHavenDetails() }
+                    searchViewModel = viewModel,
+                    selectedTabIndex = selectedHavenTab,
+                    onTabSelected = { selectedHavenTab = it },
+                    onDismiss = {
+                        selectedHavenTab = 0
+                        viewModel.clearHavenDetails()
+                    },
+                    havenViewModel = havenViewModel,
+                    authViewModel = authViewModel
                 )
             }
         }
@@ -417,90 +491,91 @@ private fun InfoChip2(icon: androidx.compose.ui.graphics.vector.ImageVector, tex
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HavenDetailsModal(
-    havenDetails: com.nicojero.mysafehaven.presentation.viewmodel.HavenDetailsState,
-    onDismiss: () -> Unit
+fun HavenDetailsModal(
+    searchViewModel: SearchViewModel,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit,
+    onDismiss: () -> Unit,
+    havenViewModel: HavenViewModel,
+    authViewModel: AuthViewModel
 ) {
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(onClick = onDismiss),
-        color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)
-    ) {
-        Column(
+    val havenDetails by searchViewModel.havenDetails.collectAsState()
+
+    val haven = havenDetails.haven ?: return
+    val havenId = haven.id
+    val isUserSubscribed = haven.isSubscribed
+
+    val tabs = listOf("Posts", "Chat Comunitario")
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        /* ---------- SCRIM ---------- */
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Bottom
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    onDismiss()
+                }
+        )
+
+        /* ---------- MODAL ---------- */
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .fillMaxHeight(0.7f)
+                .pointerInput(Unit) {}, // 👈 evita robo de eventos
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            color = MaterialTheme.colorScheme.surface
         ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.7f)
-                    .clickable(enabled = false) { },
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                color = MaterialTheme.colorScheme.surface
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = havenDetails.haven?.name ?: "",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
+            Column(modifier = Modifier.fillMaxSize()) {
+
+                /* ---------- HEADER ---------- */
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = haven.name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, contentDescription = "Cerrar")
+                    }
+                }
+
+                /* ---------- TABS ---------- */
+                PrimaryTabRow(
+                    selectedTabIndex = selectedTabIndex
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { onTabSelected(index) },
+                            text = { Text(title) }
                         )
-                        IconButton(onClick = onDismiss) {
-                            Icon(Icons.Default.Close, contentDescription = "Cerrar")
-                        }
                     }
+                }
 
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
-
-                    when {
-                        havenDetails.isLoading -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-
-                        havenDetails.error != null -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = havenDetails.error,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-
-                        havenDetails.posts.isEmpty() -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("No hay posts en este Haven")
-                            }
-                        }
-
-                        else -> {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                items(havenDetails.posts) { post ->
-                                    PostCard2(post)
-                                }
-                            }
-                        }
-                    }
+                /* ---------- CONTENT ---------- */
+                when (selectedTabIndex) {
+                    0 -> PostsTabContent(havenDetails)
+                    1 -> ChatTabContent(
+                        havenId = havenId,
+                        havenViewModel = havenViewModel,
+                        authViewModel = authViewModel,
+                        isUserSubscribed = isUserSubscribed
+                    )
                 }
             }
         }
@@ -544,6 +619,132 @@ private fun PostCard2(post: Post) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+private fun PostsTabContent(havenDetails: HavenDetailsState) {
+    val contentModifier = Modifier.fillMaxSize()
+
+    when {
+        havenDetails.isLoading -> {
+            Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+        havenDetails.error != null -> {
+            Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
+                Text(text = havenDetails.error, color = MaterialTheme.colorScheme.error)
+            }
+        }
+        havenDetails.posts.isEmpty() -> {
+            Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
+                Text("No hay posts en este Haven")
+            }
+        }
+        else -> {
+            LazyColumn(
+                modifier = contentModifier,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(havenDetails.posts) { post ->
+                    PostCard2(post)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChatTabContent (
+    havenId: Int,
+    havenViewModel: HavenViewModel,
+    authViewModel: AuthViewModel,
+    isUserSubscribed: Boolean
+) {
+    val messages by havenViewModel.messages.collectAsState()
+    val session by authViewModel.sessionState.collectAsState()
+    val myUserId = (session as? SessionState.LoggedIn)?.userId ?: -1
+
+    var text by remember { mutableStateOf("") }
+
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(havenId, isUserSubscribed) {
+        if (isUserSubscribed) {
+            havenViewModel.loadChatMessages(havenId)
+        }
+    }
+
+    if (!isUserSubscribed) {
+        Box (modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column (horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon (
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text (
+                    text = "Suscríbete al Haven para acceder al chat comunitario.",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+    } else {
+        Column (modifier = Modifier.fillMaxSize()) {
+            LazyColumn (
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                reverseLayout = true,
+                state = listState
+            ) {
+                items(messages) { message ->
+                    ChatBubble(
+                        message = message,
+                        isMine = message.userId == myUserId
+                    )
+                }
+            }
+
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField (
+                    value = text,
+                    onValueChange = { text = it },
+                    placeholder = { Text("Escribe un mensaje...") },
+                    modifier = Modifier.weight(1f),
+                    enabled = isUserSubscribed
+                )
+                IconButton (
+                    onClick = {
+                        if (text.isNotBlank()) {
+                            havenViewModel.sendMessage(havenId, text)
+                            text = ""
+                        }
+                    },
+                    enabled = text.isNotBlank()
+                ) {
+                    Icon (
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = "Enviar"
+                    )
+                }
+            }
+            LaunchedEffect(messages) {
+                if (messages.isNotEmpty()) {
+                    listState.scrollToItem(0)
+                }
+            }
         }
     }
 }

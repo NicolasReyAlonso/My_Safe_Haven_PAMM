@@ -68,12 +68,14 @@ interface ApiService {
     suspend fun getPosts(@Path("haven_id") havenId: Int): Response<List<PostDto>>
 
     // ========== CHAT ENDPOINTS ==========
-    @POST("havens/{haven_id}/messages")
+    @GET("havens/{havenId}/messages")
+    suspend fun getMessages(
+        @Path("havenId") havenId: Int
+    ): Response<List<ChatMessageDto>>
+
+    @POST("havens/{havenId}/messages")
     suspend fun sendMessage(
-        @Path("haven_id") havenId: Int,
+        @Path("havenId") havenId: Int,
         @Body request: CreateMessageRequest
     ): Response<CreateMessageResponse>
-
-    @GET("havens/{haven_id}/messages")
-    suspend fun getMessages(@Path("haven_id") havenId: Int): Response<List<ChatMessageDto>>
 }

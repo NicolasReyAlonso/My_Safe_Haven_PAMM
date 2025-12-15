@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.nicojero.mysafehaven.data.location.LocationManager
 import com.nicojero.mysafehaven.data.repository.HavenRepository
 import com.nicojero.mysafehaven.data.repository.HavenResult
+import com.nicojero.mysafehaven.domain.model.ChatMessage
 import com.nicojero.mysafehaven.domain.model.Haven
 import com.nicojero.mysafehaven.domain.model.HavenLimits
 import com.nicojero.mysafehaven.domain.model.Post
@@ -56,6 +57,13 @@ class HavenViewModel @Inject constructor(
     // ========== CREATE POST STATE ==========
     private val _createPostState = MutableStateFlow<HavenUiState>(HavenUiState.Idle)
     val createPostState: StateFlow<HavenUiState> = _createPostState.asStateFlow()
+
+    // ========== CHAT STATE ==========
+    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
+    val messages: StateFlow<List<ChatMessage>> = _messages
+
+    private val _chatState = MutableStateFlow<HavenUiState>(HavenUiState.Idle)
+    val chatState: StateFlow<HavenUiState> = _chatState
 
     // ========== HAVEN OPERATIONS ==========
 
@@ -193,5 +201,35 @@ class HavenViewModel @Inject constructor(
 
     fun resetHavensState() {
         _havensState.value = HavenUiState.Idle
+    }
+
+    fun loadChatMessages(havenId: Int) {
+        viewModelScope.launch {
+            _chatState.value = HavenUiState.Loading
+
+            when (val result = havenRepository.getMessages(havenId)) {
+                is HavenResult.Success -> {
+                    _messages.value = result.data
+                    _chatState.value = HavenUiState.Success(Unit)
+                }
+                is HavenResult.Error -> {
+                    _chatState.value =
+                        HavenUiState.Error(result.message)
+                }
+            }
+        }
+    }
+
+    fun sendMessage(havenId: Int, content: String) {
+        viewModelScope.launch {
+            when (val result = havenRepository.sendMessage(havenId, content)) {
+                is HavenResult.Success -> {
+                    _messages.value = _messages.value + result.data
+                }
+                is HavenResult.Error -> {
+                    _chatState.value = HavenUiState.Error(result.message)
+                }
+            }
+        }
     }
 }

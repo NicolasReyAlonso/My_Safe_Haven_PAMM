@@ -141,7 +141,7 @@ fun NavigationGraph(
 
             HavenDetailScreen(
                 havenId = havenId,
-                viewModel = havenViewModel,
+                havenViewModel = havenViewModel,
                 onNavigateBack = {
                     navController.popBackStack()
                 }
