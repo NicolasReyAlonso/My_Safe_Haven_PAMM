@@ -3,6 +3,7 @@
 % --- Fuentes estilo Keynote ---
 \usepackage[sfdefault]{FiraSans}
 % \usepackage[default]{lato}  % Alternativa
+\usepackage{tikz}
 
 \usepackage{xcolor}
 
@@ -20,6 +21,9 @@
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{itemize item}{\raise1.5pt\hbox{\small\textbullet}}
 \setbeamertemplate{itemize subitem}{\raise1pt\hbox{\tiny\textbullet}}
+\setbeamercolor{block title}{fg=BrownDeep,bg=CreamBG}
+\setbeamercolor{block body}{fg=BrownText,bg=CreamBG}
+
 
 % Fondo general
 \setbeamercolor{background canvas}{bg=CreamBG}
@@ -65,35 +69,41 @@
 
 \begin{document}
 
-% --- Slide de título tipo Keynote ---
-{
-\setbeamertemplate{footline}{}
-\begin{frame}
+\begin{frame}[plain]
+    % Imagen superpuesta (NO elimina el fondo)
+    \begin{tikzpicture}[remember picture,overlay]
+        \node[opacity=0.25] at (current page.center) {
+            \includegraphics[height=\paperheight]{images/Designer.png}
+        };
+    \end{tikzpicture}
+
     \vspace*{2cm}
     \centering
     {\Huge\bfseries My Safe Haven\\[0.3cm]}
     {\large Nicolás Rey Alonso, Jerónimo Omar Falcón Dávila}\\[0.2cm]
     {\small \today}
 \end{frame}
-}
+
+
+
 
 % --- Ejemplo de slide ---
 \begin{frame}{Índice}
     \begin{itemize}
         \item Introducción.
-        \item Contexto del proyecto
-        \item Arquitectura.
+        \item Mockups.
         \item Demo.
+        \item Arquitectura.
+        \item Monetización y modelo de negocio.  
         \item Tecnologías, herramientas y detalles de implementación.
     \end{itemize}
 \end{frame}
 
-% --- Slide de frase estilo keynote ---
-\begin{frame}
-    \centering
-    \vspace{1.5cm}
-    {\Large\color{BrownDeep} “La simplicidad es la máxima sofisticación.”}\\[0.2cm]
-    {\small\color{BrownText} — Leonardo da Vinci}
-\end{frame}
 
+\include{introduccion}
+\include{mockups}
+\include{demo}
+\include{arquitectura}
+\include{monetizacion}
+\include{herramientas}
 \end{document}
