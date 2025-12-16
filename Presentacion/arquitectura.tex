@@ -1,0 +1,54 @@
+\begin{frame}{Arquitectura I}
+    \vspace{-0.9cm}
+    \centering
+    {\Large\color{BrownDeep} Arquitectura MVVM}
+    \vspace{0.2cm}
+
+    \begin{itemize}
+        \item Separación clara de responsabilidades.
+        \item Comunicación desacoplada entre UI y datos.
+        \item Arquitectura escalable y mantenible.
+    \end{itemize}
+
+    \vspace{0.2cm}
+
+    \begin{columns}[T,onlytextwidth]
+        \column{0.33\textwidth}
+        \centering
+        \textbf{Presentation}\\
+        UI + ViewModels
+
+        \column{0.33\textwidth}
+        \centering
+        \textbf{Domain}\\
+        Modelos de negocio
+
+        \column{0.33\textwidth}
+        \centering
+        \textbf{Data}\\
+        Datos locales, remotos y repositorios
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Arquitectura II}
+    \vspace{-0.9cm}
+    \centering
+
+    {\Large\color{BrownDeep} Organización del proyecto}
+
+    \vspace{0.2cm}
+
+    \begin{itemize}
+        \item \textbf{Presentation}: pantallas en Jetpack Compose y ViewModels.
+        \item \textbf{Domain}: modelos que representan entidades del sistema.
+        \item \textbf{Data}: acceso a datos locales, remotos y lógica de repositorios.
+    \end{itemize}
+
+    \vspace{0.2cm}
+
+    \begin{block}{Flujo MVVM}
+        UI $\rightarrow$ ViewModel $\rightarrow$ Repository $\rightarrow$ Data Source (API / Local) \\
+        Data Source $\rightarrow$ Repository $\rightarrow$ ViewModel $\rightarrow$ UI
+    \end{block}
+\end{frame}
+

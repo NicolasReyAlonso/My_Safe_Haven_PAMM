@@ -19,6 +19,7 @@ import com.nicojero.mysafehaven.presentation.ui.screens.SearchScreen
 import com.nicojero.mysafehaven.presentation.ui.screens.SplashScreen
 import com.nicojero.mysafehaven.presentation.viewmodel.AuthViewModel
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
+import com.nicojero.mysafehaven.presentation.viewmodel.UserViewModel
 
 @Composable
 fun NavigationGraph(
@@ -95,8 +96,10 @@ fun NavigationGraph(
 
         composable(Screen.Profile.route) {
             val authViewModel: AuthViewModel = hiltViewModel()
+            val userViewModel: UserViewModel = hiltViewModel()
             ProfileScreen(
-                viewModel = authViewModel,
+                authViewModel = authViewModel,
+                userViewModel = userViewModel,
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }

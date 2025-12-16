@@ -1,0 +1,110 @@
+\documentclass[aspectratio=169]{beamer}
+
+% --- Fuentes estilo Keynote ---
+\usepackage[sfdefault]{FiraSans}
+% \usepackage[default]{lato}  % Alternativa
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+% --- Nueva paleta nude + tonos tierra ---
+\definecolor{CreamBG}{HTML}{F7F2EC}   % Beige-nude cálido
+\definecolor{BrownDeep}{HTML}{4E3B31} % Marrón profundo, elegante
+\definecolor{BrownText}{HTML}{5C4A3F} % Marrón suave para el texto
+\definecolor{BrownAccent}{HTML}{C19A6B} % Marrón-dorado natural
+\definecolor{SandLight}{HTML}{D8C9B6} % Arena claro para pie / detalles
+
+% --- Eliminar decoraciones Beamer ---
+\usetheme{default}
+\usecolortheme{default}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\raise1.5pt\hbox{\small\textbullet}}
+\setbeamertemplate{itemize subitem}{\raise1pt\hbox{\tiny\textbullet}}
+\setbeamercolor{block title}{fg=BrownDeep,bg=CreamBG}
+\setbeamercolor{block body}{fg=BrownText,bg=CreamBG}
+
+
+% Fondo general
+\setbeamercolor{background canvas}{bg=CreamBG}
+
+% --- Títulos estilo Keynote en marrón ---
+\setbeamercolor{title}{fg=BrownDeep}
+\setbeamerfont{title}{size=\Huge,series=\bfseries}
+
+\setbeamercolor{frametitle}{fg=BrownDeep}
+\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
+
+% Template del título de frame (centrado, limpio)
+\setbeamertemplate{frametitle}{
+    \begin{center}
+        \vspace{0.4cm}
+        \insertframetitle
+        \vspace{0.4cm}
+    \end{center}
+}
+
+% Texto normal en marrón suave
+\setbeamercolor{normal text}{fg=BrownText}
+\setbeamerfont{normal text}{size=\large}
+
+% Bullets marrones
+\setbeamercolor{itemize item}{fg=BrownDeep}
+\setbeamercolor{itemize subitem}{fg=BrownDeep}
+
+% --- Pie estilo Keynote nude ---
+\setbeamertemplate{footline}{
+    \begin{center}
+        \vspace{0.15cm}
+        {\color{SandLight}\footnotesize \insertshorttitle\hspace{1em}|\hspace{1em}\insertframenumber}
+        \vspace{0.25cm}
+    \end{center}
+}
+
+% --- Datos de la presentación ---
+\title[My Safe Haven]{Mi Presentación Minimalista Estilo Keynote}
+\author{Nicolás Rey Alonso, Jerónimo Omar Falcón Dávila}
+\institute{PAMN \\ ULPGC}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}[plain]
+    % Imagen superpuesta (NO elimina el fondo)
+    \begin{tikzpicture}[remember picture,overlay]
+        \node[opacity=0.25] at (current page.center) {
+            \includegraphics[height=\paperheight]{images/Designer.png}
+        };
+    \end{tikzpicture}
+
+    \vspace*{2cm}
+    \centering
+    {\Huge\bfseries My Safe Haven\\[0.3cm]}
+    {\large Nicolás Rey Alonso, Jerónimo Omar Falcón Dávila}\\[0.2cm]
+    {\small \today}
+\end{frame}
+
+
+
+
+% --- Ejemplo de slide ---
+\begin{frame}{Índice}
+    \begin{itemize}
+        \item Introducción.
+        \item Mockups.
+        \item Demo.
+        \item Arquitectura.
+        \item Monetización y modelo de negocio.  
+        \item Tecnologías, herramientas y detalles de implementación.
+    \end{itemize}
+\end{frame}
+
+
+\include{introduccion}
+\include{mockups}
+\include{demo}
+\include{arquitectura}
+\include{monetizacion}
+\include{herramientas}
+\include{fin}
+\end{document}

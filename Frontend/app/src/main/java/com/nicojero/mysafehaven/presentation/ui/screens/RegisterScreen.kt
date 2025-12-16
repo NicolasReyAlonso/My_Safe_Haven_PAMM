@@ -1,13 +1,27 @@
 package com.nicojero.mysafehaven.presentation.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.nicojero.mysafehaven.presentation.viewmodel.AuthUiState
 import com.nicojero.mysafehaven.presentation.viewmodel.AuthViewModel
 
@@ -17,17 +31,24 @@ fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToHome: () -> Unit
 ) {
+    val context = LocalContext.current
+
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val authState by viewModel.authState.collectAsState()
-
-    // Variables para mostrar errores de validación
     var validationError by remember { mutableStateOf<String?>(null) }
 
-    // Navegar cuando el registro sea exitoso
+    // Launcher para seleccionar imagen
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        selectedImageUri = uri
+    }
+
     LaunchedEffect(authState) {
         if (authState is AuthUiState.Success) {
             onNavigateToHome()
@@ -39,7 +60,8 @@ fun RegisterScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "Bienvenido",
@@ -51,6 +73,47 @@ fun RegisterScreen(
             text = "Crea tu cuenta",
             style = MaterialTheme.typography.headlineMedium
         )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ===== SELECTOR DE IMAGEN DE PERFIL =====
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                .clickable {
+                    imagePickerLauncher.launch("image/*")
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            if (selectedImageUri != null) {
+                Image(
+                    painter = rememberAsyncImagePainter(selectedImageUri),
+                    contentDescription = "Profile Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Select Profile Image",
+                    modifier = Modifier.size(80.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            // Ícono de cámara en la esquina
+            Icon(
+                imageVector = Icons.Default.CameraAlt,
+                contentDescription = "Camera",
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp)
+                    .size(24.dp),
+                tint = Color.White
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
@@ -107,7 +170,6 @@ fun RegisterScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Mostrar error de validación
         validationError?.let { error ->
             Text(
                 text = error,
@@ -117,7 +179,6 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Mostrar error del servidor
         if (authState is AuthUiState.Error) {
             Text(
                 text = (authState as AuthUiState.Error).message,
@@ -129,7 +190,6 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                // Validaciones
                 when {
                     username.isBlank() -> {
                         validationError = "El nombre de usuario es requerido"
@@ -150,7 +210,13 @@ fun RegisterScreen(
                         validationError = "Las contraseñas no coinciden"
                     }
                     else -> {
-                        viewModel.register(username, email, password)
+                        viewModel.registerWithImage(
+                            username = username,
+                            email = email,
+                            password = password,
+                            imageUri = selectedImageUri,
+                            context = context
+                        )
                     }
                 }
             },
