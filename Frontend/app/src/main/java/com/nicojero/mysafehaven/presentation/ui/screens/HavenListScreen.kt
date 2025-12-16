@@ -1,5 +1,6 @@
 package com.nicojero.mysafehaven.presentation.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -66,7 +68,6 @@ fun HavensListScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadHavens()
-        viewModel.checkCanCreateHaven()
     }
 
     Scaffold(
@@ -79,17 +80,11 @@ fun HavensListScreen(
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             // Header con límites
             havenLimits?.let { limits ->
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if (limits.isPro)
                             MaterialTheme.colorScheme.primaryContainer
@@ -169,20 +164,59 @@ fun HavensListScreen(
                             }
                         }
                     } else {
+                        val ownedHavens = havens.filter { !it.isSubscribed }
+                        val subscribedHavens = havens.filter { it.isSubscribed }
+                        LaunchedEffect(havens) {
+                            Log.d("HAVENS", "Total: ${havens.size}")
+                            Log.d("HAVENS", "Subscribed: ${havens.count { it.isSubscribed }}")
+                        }
+
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(havens) { haven ->
-                                HavenItem(
-                                    haven = haven,
-                                    onClick = { onHavenClick(haven) },
-                                    onDeleteClick = {
-                                        havenToDelete = haven
-                                        showDeleteDialog = true
-                                    }
-                                )
+                            if (ownedHavens.isNotEmpty()) {
+                                item {
+                                    Text(
+                                        text = "Mis Havens",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    )
+                                }
+
+                                items(ownedHavens) { haven ->
+                                    HavenItem(
+                                        haven = haven,
+                                        onClick = { onHavenClick(haven) },
+                                        onDeleteClick = {
+                                            havenToDelete = haven
+                                            showDeleteDialog = true
+                                        },
+                                        isSubscribed = false
+                                    )
+                                }
+                            }
+
+                            if (subscribedHavens.isNotEmpty()) {
+                                item {
+                                    Text(
+                                        text = "Havens suscritos",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    )
+                                }
+
+                                items(subscribedHavens) { haven ->
+                                    HavenItem(
+                                        haven = haven,
+                                        onClick = { onHavenClick(haven) },
+                                        onDeleteClick = {},
+                                        isSubscribed = true
+                                    )
+                                }
                             }
                         }
                     }
@@ -221,7 +255,8 @@ fun HavensListScreen(
 fun HavenItem(
     haven: Haven,
     onClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    isSubscribed: Boolean
 ) {
     Card(
         modifier = Modifier
@@ -229,7 +264,7 @@ fun HavenItem(
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
+        Row (
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -276,12 +311,20 @@ fun HavenItem(
                 }
             }
 
-            IconButton(onClick = onDeleteClick) {
+            if (isSubscribed) {
                 Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Eliminar",
-                    tint = MaterialTheme.colorScheme.error
+                    Icons.Default.Star,
+                    contentDescription = "Suscrito",
+                    tint = MaterialTheme.colorScheme.primary
                 )
+            } else {
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Eliminar",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }

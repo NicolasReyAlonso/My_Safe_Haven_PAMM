@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nicojero.mysafehaven.presentation.viewmodel.AuthViewModel
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
@@ -47,7 +44,8 @@ fun ChatSection(
     havenViewModel: HavenViewModel,
     authViewModel: AuthViewModel,
     isChatOpen: Boolean,
-    onToggleChat: () -> Unit
+    onToggleChat: () -> Unit,
+    modifier: Modifier
 ) {
     val messages by havenViewModel.messages.collectAsState()
     val session by authViewModel.sessionState.collectAsState()
@@ -81,9 +79,9 @@ fun ChatSection(
     } else {
         Card (
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 350.dp)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .fillMaxSize()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(top = 96.dp, bottom = 8.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
@@ -92,24 +90,6 @@ fun ChatSection(
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 8.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Chat de la sala",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    IconButton(onClick = onToggleChat) {
-                        Icon(Icons.Default.Close, contentDescription = "Cerrar")
-                    }
-                }
-
-
                 HorizontalDivider()
 
                 LazyColumn(

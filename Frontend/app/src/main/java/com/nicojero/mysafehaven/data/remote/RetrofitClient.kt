@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val BASE_URL = "http://10.195.48.61:5050/" // Para emulador Android
+    private const val BASE_URL = "http://192.168.1.35:5050/" // Para emulador Android
     // private const val BASE_URL = "http://localhost:5050/" // Para dispositivo físico usa tu IP local
 
     // ✅ Nueva función para obtener la BASE_URL

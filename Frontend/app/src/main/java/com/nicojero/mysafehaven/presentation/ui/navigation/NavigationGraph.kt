@@ -8,6 +8,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.nicojero.mysafehaven.presentation.ui.screens.ChatScreen
 import com.nicojero.mysafehaven.presentation.ui.screens.CreateHavenScreen
 import com.nicojero.mysafehaven.presentation.ui.screens.HavenDetailScreen
 import com.nicojero.mysafehaven.presentation.ui.screens.HavensListScreen
@@ -144,11 +145,27 @@ fun NavigationGraph(
 
             HavenDetailScreen(
                 havenId = havenId,
-                havenViewModel = havenViewModel,
+                viewModel = havenViewModel,
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onOpenChat = { id ->
+                    navController.navigate("chat/$id")
                 }
             )
         }
+
+        composable(
+            route = "chat/{havenId}",
+            arguments = listOf(navArgument("havenId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val havenId = backStackEntry.arguments?.getInt("havenId") ?: return@composable
+            ChatScreen(
+                havenId = havenId,
+                havenViewModel = hiltViewModel(),
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
     }
 }
