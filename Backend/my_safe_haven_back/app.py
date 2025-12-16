@@ -2,6 +2,8 @@
 import os
 from flask import Flask, jsonify, request, send_from_directory
 from datetime import timedelta
+import uuid
+from werkzeug.utils import secure_filename
 
 from flask_jwt_extended import (
     create_access_token, jwt_required, get_jwt_identity, JWTManager
@@ -19,7 +21,11 @@ app.config['JWT_SECRET_KEY'] = 'Nicolololololololololololo'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=30)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
+def allowed_file(filename: str) -> bool:    
+    return '.' in filename and filename.rsplit('.', 1)[1].lower
 
 # Inicializa extensiones con ESTA app
 db.init_app(app)
@@ -57,32 +63,84 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 def home():
     return jsonify({"message": "Backend My Safe Haven funcionando!"})
 
+
 @app.route('/register', methods=['POST'])
 def register():
+    # Detectamos si viene como multipart/form-data (con archivo) o JSON
+    is_multipart = request.content_type and request.content_type.startswith('multipart/form-data')
+
+    if is_multipart:
+        form = request.form
+        username = form.get('username')
+        mail = form.get('mail')
+        password = form.get('password')
+        image = request.files.get('profile_image')  # <-- nombre del campo de archivo
+
+        # Validaciones mínimas (igual que antes)
+        if not username or not mail or not password:
+            return jsonify({"error": "Faltan campos requeridos"}), 400
+
+        # Chequeo de unicidad
+        if User.query.filter_by(username=username).first():
+            return jsonify({"error": "El username ya existe"}), 409
+        if User.query.filter_by(mail=mail).first():
+            return jsonify({"error": "El email ya está registrado"}), 409
+
+        # Guardado de imagen (si viene)
+        profile_image_path = None
+        if image:
+            if not image.filename:
+                return jsonify({"error": "El archivo de imagen no tiene nombre"}), 400
+            if not allowed_file(image.filename):
+                return jsonify({"error": "Formato de imagen no permitido"}), 400
+
+            # Nombre seguro + UUID para evitar colisiones
+            filename = secure_filename(image.filename)
+            ext = filename.rsplit('.', 1)[1].lower()
+            unique_name = f"{uuid.uuid4().hex}.{ext}"
+            save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+            image.save(save_path)
+
+            # Guardamos ruta relativa (ej. 'uploads/uuid.jpg')
+            profile_image_path = f"{app.config['UPLOAD_FOLDER']}/{unique_name}"
+
+        # Creamos usuario
+        user = User(
+            username=username,
+            mail=mail,
+            profile_image_path=profile_image_path
+        )
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+
+        access_token = create_access_token(identity=str(user.id))
+        return jsonify({
+            "message": "Usuario registrado exitosamente",
+            "access_token": access_token,
+            "user": user.to_dict()
+        }), 201
+
+    # -------- JSON (comportamiento previo) --------
     data = request.get_json()
-    
-    if not data.get('username') or not data.get('mail') or not data.get('password'):
+    if not data or not data.get('username') or not data.get('mail') or not data.get('password'):
         return jsonify({"error": "Faltan campos requeridos"}), 400
-    
+
     if User.query.filter_by(username=data['username']).first():
         return jsonify({"error": "El username ya existe"}), 409
-    
     if User.query.filter_by(mail=data['mail']).first():
         return jsonify({"error": "El email ya está registrado"}), 409
-    
+
     user = User(
         username=data['username'],
         mail=data['mail'],
-        profile_image_path=data.get('profile_image_path')
+        profile_image_path=data.get('profile_image_path')  # mantiene compatibilidad
     )
     user.set_password(data['password'])
-    
     db.session.add(user)
     db.session.commit()
-    
-    # ✅ CAMBIO AQUÍ: Convertir a string
+
     access_token = create_access_token(identity=str(user.id))
-    
     return jsonify({
         "message": "Usuario registrado exitosamente",
         "access_token": access_token,
@@ -445,6 +503,14 @@ def get_messages(haven_id):
     messages = ChatMessage.query.filter_by(haven_id=haven_id).order_by(ChatMessage.date.asc()).all()
     
     return jsonify([m.to_dict() for m in messages]), 200
+
+# ==================== SERVE FILES ====================
+
+# Ruta para servir imágenes de perfil (no interfiere con nada más)
+@app.route('/uploads/<path:filename>', methods=['GET'])
+def serve_upload(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 # ==================== WEBSOCKET EVENTS ====================
 

@@ -1,12 +1,23 @@
 package com.nicojero.mysafehaven.data.remote
 
 import com.nicojero.mysafehaven.data.remote.dto.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
 
     // ========== AUTH ENDPOINTS ==========
+    @Multipart
+    @POST("register")
+    suspend fun registerWithImage(
+        @Part("username") username: RequestBody,
+        @Part("mail") mail: RequestBody,
+        @Part("password") password: RequestBody,
+        @Part profileImage: MultipartBody.Part?
+    ): Response<AuthResponse>
+
     @POST("register")
     suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
 

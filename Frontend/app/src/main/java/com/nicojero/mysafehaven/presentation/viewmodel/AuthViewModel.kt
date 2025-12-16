@@ -1,5 +1,7 @@
 package com.nicojero.mysafehaven.presentation.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nicojero.mysafehaven.data.repository.AuthRepository
@@ -29,8 +31,8 @@ sealed class AuthUiState {
     data class Error(val message: String) : AuthUiState()
 }
 
-@HiltViewModel  // ✅ Agregar esta anotación
-class AuthViewModel @Inject constructor(  // ✅ Agregar @Inject
+@HiltViewModel
+class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
@@ -89,6 +91,40 @@ class AuthViewModel @Inject constructor(  // ✅ Agregar @Inject
             _authState.value = AuthUiState.Loading
 
             when (val result = authRepository.register(username, email, password)) {
+                is AuthResult.Success -> {
+                    _authState.value = AuthUiState.Success
+                    _sessionState.value = SessionState.LoggedIn(
+                        userId = result.userId,
+                        username = result.username,
+                        email = result.email
+                    )
+                }
+                is AuthResult.Error -> {
+                    _authState.value = AuthUiState.Error(result.message)
+                    _sessionState.value = SessionState.LoggedOut
+                }
+            }
+        }
+    }
+
+    // ✅ NUEVA FUNCIÓN: Registrar con imagen
+    fun registerWithImage(
+        username: String,
+        email: String,
+        password: String,
+        imageUri: Uri?,
+        context: Context
+    ) {
+        viewModelScope.launch {
+            _authState.value = AuthUiState.Loading
+
+            when (val result = authRepository.registerWithImage(
+                username = username,
+                email = email,
+                password = password,
+                imageUri = imageUri,
+                context = context
+            )) {
                 is AuthResult.Success -> {
                     _authState.value = AuthUiState.Success
                     _sessionState.value = SessionState.LoggedIn(
