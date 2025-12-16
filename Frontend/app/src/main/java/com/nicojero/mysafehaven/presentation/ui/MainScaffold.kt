@@ -49,8 +49,7 @@ fun MainScaffold() {
     val bottomNavItems = listOf(
         BottomNavItem(Screen.Home.route, Icons.Filled.Home, "Inicio"),
         BottomNavItem(Screen.HavensList.route, Icons.Filled.Place, "Havens"),
-        BottomNavItem(Screen.Search.route, Icons.Filled.Search, "Buscar"),
-        BottomNavItem(Screen.Profile.route, Icons.Filled.Person, "Perfil")
+        BottomNavItem(Screen.Search.route, Icons.Filled.Search, "Buscar")
     )
 
     Scaffold(
