@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.10.17)  16 DEC 2025 16:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.10.17)  16 DEC 2025 16:25
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -626,7 +626,7 @@ LaTeX Font Info:    Font shape `OT1/FiraSans-OsF/regular/n' will be
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count355
 \l__pdf_internal_box=\box82
-) (./main.aux (./introduccion.aux) (./mockups.aux) (./demo.aux) (./arquitectura.aux) (./monetizacion.aux) (./herramientas.aux))
+) (./main.aux (./introduccion.aux) (./mockups.aux) (./demo.aux) (./arquitectura.aux) (./monetizacion.aux) (./herramientas.aux) (./fin.aux))
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 70.
@@ -1004,6 +1004,25 @@ Package pdftex.def Info: images/github.png  used on input line 47.
 [11
 
  <./images/Figma.png> <./images/Trello.png> <./images/latex.png> <./images/github.png>])
+\openout2 = `fin.aux'.
+
+ (./fin.tex
+File: images/Designer.png Graphic file (type png)
+<use images/Designer.png>
+Package pdftex.def Info: images/Designer.png  used on input line 17.
+(pdftex.def)             Requested size: 256.0654pt x 256.0748pt.
+LaTeX Font Info:    Font shape `OT1/FiraSans-OsF/m/it' in size <12> not available
+(Font)              Font shape `OT1/FiraSans-OsF/regular/it' tried instead on input line 17.
+LaTeX Font Info:    Font shape `OT1/FiraSans-OsF/regular/it' will be
+(Font)              scaled to size 12.0pt on input line 17.
+
+
+[12
+
+
+
+
+])
 \tf@nav=\write6
 \openout6 = `main.nav'.
 
@@ -1013,7 +1032,7 @@ Package pdftex.def Info: images/github.png  used on input line 47.
 \tf@snm=\write8
 \openout8 = `main.snm'.
 
- (./main.aux (./introduccion.aux) (./mockups.aux) (./demo.aux) (./arquitectura.aux) (./monetizacion.aux) (./herramientas.aux))
+ (./main.aux (./introduccion.aux) (./mockups.aux) (./demo.aux) (./arquitectura.aux) (./monetizacion.aux) (./herramientas.aux) (./fin.aux))
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -1022,18 +1041,18 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 25639 strings out of 473190
- 511646 string characters out of 5715799
- 860690 words of memory out of 5000000
- 48322 multiletter control sequences out of 15000+600000
- 625411 words of font info for 72 fonts, out of 8000000 for 9000
+ 25685 strings out of 473190
+ 512385 string characters out of 5715799
+ 861096 words of memory out of 5000000
+ 48356 multiletter control sequences out of 15000+600000
+ 631286 words of font info for 80 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  128i,11n,123p,466b,681s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2025/texmf-dist/fonts/type1/public/fira/FiraSans-Bold.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/fira/FiraSans-Regular.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-Output written on main.pdf (11 pages, 2223114 bytes).
+</usr/local/texlive/2025/texmf-dist/fonts/type1/public/fira/FiraSans-Bold.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/fira/FiraSans-Regular.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
+Output written on main.pdf (12 pages, 2231692 bytes).
 PDF statistics:
- 146 PDF objects out of 1000 (max. 8388607)
- 83 compressed objects within 1 object stream
- 23 named destinations out of 1000 (max. 500000)
+ 159 PDF objects out of 1000 (max. 8388607)
+ 92 compressed objects within 1 object stream
+ 25 named destinations out of 1000 (max. 500000)
  108 words of extra memory for PDF output out of 10000 (max. 10000000)
 
