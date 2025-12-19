@@ -60,6 +60,29 @@
         \vspace{0.25cm}
     \end{center}
 }
+% --- Table of Contents centrada y en negrita ---
+\setbeamertemplate{section in toc}{
+    \leavevmode
+    \vspace{0.35em}
+    \leftskip=3em % <-- MÁS AL CENTRO (ajusta a gusto)
+    \raise1.5pt\hbox{\small\textbullet}\hspace{0.75em}
+    {\bfseries\inserttocsection}
+    \par
+}
+
+\setbeamertemplate{subsection in toc}{
+    \leavevmode
+    \vspace{0.25em}
+    \leftskip=5em
+    \raise1pt\hbox{\tiny\textbullet}\hspace{0.5em}
+    {\bfseries\inserttocsubsection}
+    \par
+}
+
+% Colores del TOC
+\setbeamercolor{section in toc}{fg=BrownDeep}
+\setbeamercolor{subsection in toc}{fg=BrownText}
+
 
 % --- Datos de la presentación ---
 \title[My Safe Haven]{Mi Presentación Minimalista Estilo Keynote}
@@ -89,22 +112,20 @@
 
 % --- Ejemplo de slide ---
 \begin{frame}{Índice}
-    \begin{itemize}
-        \item Introducción.
-        \item Mockups.
-        \item Demo.
-        \item Arquitectura.
-        \item Monetización y modelo de negocio.  
-        \item Tecnologías, herramientas y detalles de implementación.
-    \end{itemize}
+        \tableofcontents
 \end{frame}
 
-
+\section{Introducción}
 \include{introduccion}
+\section{Mockups}
 \include{mockups}
+\section{Demo}
 \include{demo}
+\section{Arquitectura}
 \include{arquitectura}
+\section{Monetización}
 \include{monetizacion}
+\section{Herramientas}
 \include{herramientas}
 \include{fin}
 \end{document}

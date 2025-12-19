@@ -1,0 +1,6 @@
+\beamer@sectionintoc {1}{Introducción}{3}{0}{1}
+\beamer@sectionintoc {2}{Mockups}{5}{0}{2}
+\beamer@sectionintoc {3}{Demo}{6}{0}{3}
+\beamer@sectionintoc {4}{Arquitectura}{7}{0}{4}
+\beamer@sectionintoc {5}{Monetización}{9}{0}{5}
+\beamer@sectionintoc {6}{Herramientas}{10}{0}{6}
