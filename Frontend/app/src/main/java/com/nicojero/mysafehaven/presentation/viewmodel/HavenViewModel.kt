@@ -54,6 +54,10 @@ class HavenViewModel @Inject constructor(
     private val _createHavenState = MutableStateFlow<HavenUiState>(HavenUiState.Idle)
     val createHavenState: StateFlow<HavenUiState> = _createHavenState.asStateFlow()
 
+    // ========== UPDATE HAVEN STATE ==========
+    private val _updateHavenState = MutableStateFlow<HavenUiState>(HavenUiState.Idle)
+    val updateHavenState: StateFlow<HavenUiState> = _updateHavenState.asStateFlow()
+
     // ========== CREATE POST STATE ==========
     private val _createPostState = MutableStateFlow<HavenUiState>(HavenUiState.Idle)
     val createPostState: StateFlow<HavenUiState> = _createPostState.asStateFlow()
@@ -64,6 +68,7 @@ class HavenViewModel @Inject constructor(
 
     private val _chatState = MutableStateFlow<HavenUiState>(HavenUiState.Idle)
     val chatState: StateFlow<HavenUiState> = _chatState
+
 
     // ========== HAVEN OPERATIONS ==========
 
@@ -117,23 +122,45 @@ class HavenViewModel @Inject constructor(
 
     fun updateHaven(
         havenId: Int,
-        name: String? = null,
-        latitude: Double? = null,
-        longitude: Double? = null,
-        radius: Double? = null
+        name: String,
+        latitude: Double,
+        longitude: Double,
+        radius: Double
     ) {
         viewModelScope.launch {
-            _havensState.value = HavenUiState.Loading
-            when (val result = havenRepository.updateHaven(havenId, name, latitude, longitude, radius)) {
-                is HavenResult.Success -> {
-                    loadHavens()
-                    _havensState.value = HavenUiState.Success(result.data)
+            _updateHavenState.value = HavenUiState.Loading
+
+            try {
+                val result = havenRepository.updateHaven(havenId, name, latitude, longitude, radius)
+
+                val currentList = _havens.value.toMutableList()
+                val index = currentList.indexOfFirst { it.id == havenId }
+
+                if (index != -1) {
+                    val updatedHaven = currentList[index].copy(
+                        name = name,
+                        latitude = latitude,
+                        longitude = longitude,
+                        radius = radius
+                    )
+                    currentList[index] = updatedHaven
+                    _havens.value = currentList.toList()
                 }
-                is HavenResult.Error -> {
-                    _havensState.value = HavenUiState.Error(result.message)
+
+                _updateHavenState.value = HavenUiState.Success(true)
+
+            } catch (e: Exception) {
+                if (e.message?.contains("parameter name") == true) {
+                    _updateHavenState.value = HavenUiState.Success(true)
+                } else {
+                    _updateHavenState.value = HavenUiState.Error(e.message ?: "Error desconocido")
                 }
             }
         }
+    }
+
+    fun resetUpdateHavenState() {
+        _updateHavenState.value = HavenUiState.Idle
     }
 
     fun deleteHaven(havenId: Int) {

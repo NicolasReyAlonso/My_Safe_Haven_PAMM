@@ -43,7 +43,7 @@ fun RadarTopBar(
                 Icon(
                     if (isLoggedIn) Icons.Filled.AccountCircle else Icons.Filled.Person,
                     contentDescription = if (isLoggedIn) "Perfil" else "Iniciar sesión",
-                    tint = if (isLoggedIn) Color(0xFF90EE90) else MaterialTheme.colorScheme.onSurface
+                    tint = if (isLoggedIn) Color(0xFF6B5D52) else MaterialTheme.colorScheme.onSurface
                 )
             }
         }

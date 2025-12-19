@@ -56,6 +56,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
+import androidx.navigation.NavHostController
 import com.nicojero.mysafehaven.domain.model.Post
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenUiState
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
@@ -64,6 +68,7 @@ import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
 @Composable
 fun HavenDetailScreen(
     havenId: Int,  // Cambiado: recibir el ID en lugar del objeto
+    navController: NavHostController,
     viewModel: HavenViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onOpenChat: (havenId: Int) -> Unit
@@ -73,11 +78,14 @@ fun HavenDetailScreen(
     val postsState by viewModel.postsState.collectAsState()
     val createPostState by viewModel.createPostState.collectAsState()
 
+    // Buscar el haven por ID
+    val haven = remember(havens, havenId) { havens.find { it.id == havenId } }
+
     var showCreatePostDialog by remember { mutableStateOf(false) }
     var postContent by remember { mutableStateOf("") }
 
-    // Buscar el haven por ID
-    val haven = havens.find { it.id == havenId }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
 
     // Cargar havens si la lista está vacía
     LaunchedEffect(Unit) {
@@ -102,191 +110,206 @@ fun HavenDetailScreen(
         }
     }
 
-    // Mostrar loading mientras cargamos el haven
-    if (haven == null) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                CircularProgressIndicator()
-                Text(
-                    text = "Cargando haven...",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            }
+    LaunchedEffect(lifecycleState) {
+        if (lifecycleState == Lifecycle.State.RESUMED) {
+            viewModel.loadHavens()
         }
-        return
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(haven.name) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+    // Mostrar loading mientras cargamos el haven
+    if (haven == null) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Cargando...") },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        }
                     }
-                },
-                actions = {
-                    IconButton(onClick = { /* TODO: Editar haven */ }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar")
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showCreatePostDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary
+                )
+            }
+        ) { padding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Crear Post")
+                CircularProgressIndicator()
             }
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            // Haven Info Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+    } else {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(haven.name) },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { navController.navigate("editHaven/${haven.id}") }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Editar")
+                        }
+                    }
                 )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { showCreatePostDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Place,
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = haven.name,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Text(
-                                text = "Radio: ${haven.radius.toInt()}m",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider()
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        InfoChip(
-                            icon = Icons.Default.LocationOn,
-                            text = String.format("%.6f", haven.latitude)
-                        )
-                        InfoChip(
-                            icon = Icons.Default.LocationOn,
-                            text = String.format("%.6f", haven.longitude)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(onClick = { onOpenChat(haven.id) }) {
-                            Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = "Abrir chat")
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Chat")
-                        }
-                    }
+                    Icon(Icons.Default.Add, contentDescription = "Crear Post")
                 }
             }
-
-            // Posts Section
-            Text(
-                text = "Feed",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-
-            when (postsState) {
-                is HavenUiState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                // Haven Info Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        CircularProgressIndicator()
-                    }
-                }
-                is HavenUiState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = (postsState as HavenUiState.Error).message,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodyMedium
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Place,
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
                             )
-                            Button(onClick = { viewModel.loadPosts(haven.id) }) {
-                                Text("Reintentar")
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = haven.name,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Text(
+                                    text = "Radio: ${haven.radius.toInt()}m",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        HorizontalDivider()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            InfoChip(
+                                icon = Icons.Default.LocationOn,
+                                text = String.format("%.6f", haven.latitude)
+                            )
+                            InfoChip(
+                                icon = Icons.Default.LocationOn,
+                                text = String.format("%.6f", haven.longitude)
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Button(onClick = { onOpenChat(haven.id) }) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.Chat,
+                                    contentDescription = "Abrir chat"
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Chat")
                             }
                         }
                     }
                 }
-                else -> {
-                    if (posts.isEmpty()) {
+
+                // Posts Section
+                Text(
+                    text = "Feed",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                when (postsState) {
+                    is HavenUiState.Loading -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    Icons.Default.EditNote,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(64.dp),
-                                    tint = MaterialTheme.colorScheme.outline
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    is HavenUiState.Error -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 Text(
-                                    text = "No hay posts aún",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.outline
+                                    text = (postsState as HavenUiState.Error).message,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Sé el primero en publicar algo",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
+                                Button(onClick = { viewModel.loadPosts(haven.id) }) {
+                                    Text("Reintentar")
+                                }
                             }
                         }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(posts) { post ->
-                                PostCard(post = post)
+                    }
+
+                    else -> {
+                        if (posts.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(
+                                        Icons.Default.EditNote,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(64.dp),
+                                        tint = MaterialTheme.colorScheme.outline
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "No hay posts aún",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "Sé el primero en publicar algo",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                }
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(posts) { post ->
+                                    PostCard(post = post)
+                                }
                             }
                         }
                     }
@@ -314,7 +337,7 @@ fun HavenDetailScreen(
                 Button(
                     onClick = {
                         if (postContent.isNotBlank()) {
-                            viewModel.createPost(haven.id, postContent)
+                            haven?.let { viewModel.createPost(it.id, postContent) }
                         }
                     },
                     enabled = postContent.isNotBlank() &&

@@ -18,6 +18,7 @@ import com.nicojero.mysafehaven.presentation.ui.screens.ProfileScreen
 import com.nicojero.mysafehaven.presentation.ui.screens.RegisterScreen
 import com.nicojero.mysafehaven.presentation.ui.screens.SearchScreen
 import com.nicojero.mysafehaven.presentation.ui.screens.SplashScreen
+import com.nicojero.mysafehaven.presentation.ui.screens.UpdateHavenScreen
 import com.nicojero.mysafehaven.presentation.viewmodel.AuthViewModel
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
 import com.nicojero.mysafehaven.presentation.viewmodel.UserViewModel
@@ -145,6 +146,7 @@ fun NavigationGraph(
 
             HavenDetailScreen(
                 havenId = havenId,
+                navController = navController,
                 viewModel = havenViewModel,
                 onNavigateBack = {
                     navController.popBackStack()
@@ -163,6 +165,18 @@ fun NavigationGraph(
             ChatScreen(
                 havenId = havenId,
                 havenViewModel = hiltViewModel(),
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "editHaven/{havenId}",
+            arguments = listOf(navArgument("havenId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val havenId = backStackEntry.arguments?.getInt("havenId") ?: return@composable
+
+            UpdateHavenScreen(
+                havenId = havenId,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
