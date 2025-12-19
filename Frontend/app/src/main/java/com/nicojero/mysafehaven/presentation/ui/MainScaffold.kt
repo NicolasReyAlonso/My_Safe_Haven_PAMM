@@ -20,12 +20,8 @@ import com.nicojero.mysafehaven.presentation.viewmodel.SessionState
 @Composable
 fun MainScaffold() {
     val navController = rememberNavController()
-
-    // ✅ Usar hiltViewModel() en lugar de crear instancias manualmente
     val authViewModel: AuthViewModel = hiltViewModel()
-
     val sessionState by authViewModel.sessionState.collectAsState()
-
     val startDestination = when (sessionState) {
         is SessionState.Loading -> Screen.Splash.route
         is SessionState.LoggedIn -> Screen.Home.route

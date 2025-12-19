@@ -94,11 +94,20 @@ class SearchViewModel @Inject constructor(
             when (val result = havenRepository.subscribeToHaven(havenId)) {
                 is HavenResult.Success -> {
                     _subscriptionMessage.emit(result.data)
-                    // Recargar havens para actualizar el estado de suscripción
-                    _currentLocation.value?.let {
-                        loadNearbyHavens(it.latitude, it.longitude)
+
+                    _uiState.update { state ->
+                        if (state is SearchUiState.Success) {
+                            state.copy(
+                                nearbyHavens = state.nearbyHavens.map { haven ->
+                                    if (haven.id == havenId) {
+                                        haven.copy(isSubscribed = true)
+                                    } else haven
+                                }
+                            )
+                        } else state
                     }
                 }
+
                 is HavenResult.Error -> {
                     _subscriptionMessage.emit(result.message)
                 }
@@ -106,21 +115,33 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+
     fun unsubscribeFromHaven(havenId: Int) {
         viewModelScope.launch {
             when (val result = havenRepository.unsubscribeFromHaven(havenId)) {
                 is HavenResult.Success -> {
                     _subscriptionMessage.emit(result.data)
-                    _currentLocation.value?.let {
-                        loadNearbyHavens(it.latitude, it.longitude)
+
+                    _uiState.update { state ->
+                        if (state is SearchUiState.Success) {
+                            state.copy(
+                                nearbyHavens = state.nearbyHavens.map { haven ->
+                                    if (haven.id == havenId) {
+                                        haven.copy(isSubscribed = false)
+                                    } else haven
+                                }
+                            )
+                        } else state
                     }
                 }
+
                 is HavenResult.Error -> {
                     _subscriptionMessage.emit(result.message)
                 }
             }
         }
     }
+
 
     fun loadHavenDetails(haven: Haven) {
         viewModelScope.launch {

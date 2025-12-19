@@ -6,6 +6,7 @@ import com.nicojero.mysafehaven.data.local.AuthDataStore
 import com.nicojero.mysafehaven.data.remote.ApiService
 import com.nicojero.mysafehaven.data.remote.dto.LoginRequest
 import com.nicojero.mysafehaven.data.remote.dto.RegisterRequest
+import com.nicojero.mysafehaven.data.remote.dto.UserDto
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -205,6 +206,19 @@ class AuthRepository @Inject constructor(
     suspend fun logout() {
         authDataStore.clearAuthData()
     }
+    suspend fun getCurrentUser(): UserDto? {
+        return try {
+            val response = apiService.getCurrentUser()
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
 
     suspend fun verifyToken(): Boolean {
         return try {

@@ -232,6 +232,23 @@ class HavenRepository @Inject constructor(
         ownerUsername = ownerUsername
     )
 
+    suspend fun getSubscribedHavens(): HavenResult<List<Haven>> {
+        return try {
+            val response = apiService.getSubscribedHavens()
+
+            if (response.isSuccessful && response.body() != null) {
+                HavenResult.Success(
+                    response.body()!!.map { it.toNearbyDomainModel() }
+                )
+            } else {
+                HavenResult.Error("Error al obtener havens suscritos", response.code())
+            }
+        } catch (e: Exception) {
+            HavenResult.Error(e.message ?: "Error de conexión")
+        }
+    }
+
+
     private fun PostDto.toDomainModel() = Post(
         id = postId,
         havenId = havenId,

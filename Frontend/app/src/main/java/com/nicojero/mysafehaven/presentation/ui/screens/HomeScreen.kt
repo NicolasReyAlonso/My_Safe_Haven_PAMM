@@ -1,31 +1,83 @@
 package com.nicojero.mysafehaven.presentation.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
+import com.nicojero.mysafehaven.domain.model.Haven
+import com.nicojero.mysafehaven.domain.model.Post
+import com.nicojero.mysafehaven.presentation.viewmodel.HomeViewModel
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
-fun HomeScreen(
-    onNavigateToHavens: () -> Unit = {}
+fun HavenList(
+    havens: List<Haven>,
+    onOpenChat: (Int) -> Unit,
+    onOpenDetails: (Haven) -> Unit
 ) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(havens) { haven ->
+            HavenCard(
+                haven = haven,
+                onClick = { onOpenDetails(haven) },
+                onSubscribe = {},
+                onUnsubscribe = {},
+                onOpenChat = { onOpenChat(haven.id) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun InfoCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "💡 ¿Qué es un Haven?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Un Haven es una zona geográfica segura donde puedes compartir contenido y chatear con personas cercanas.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+@Composable
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
+    onOpenChat: (Int) -> Unit
+) {
+    val havens by viewModel.uiState.collectAsState()
+
+    // Estado local para el modal
+    var selectedHaven by remember { mutableStateOf<Haven?>(null) }
+    var havenDetails by remember { mutableStateOf<com.nicojero.mysafehaven.presentation.viewmodel.HavenDetailsState>(
+        com.nicojero.mysafehaven.presentation.viewmodel.HavenDetailsState()
+    ) }
 
     Column(
         modifier = Modifier
@@ -47,66 +99,166 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Quick Actions
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                // Navegar a la lista de havens
-                // Nota: Necesitarás pasar el navController desde MainScaffold
-                // o usar un LocalNavController
-            }
+        if (havens.isEmpty()) {
+            Text(
+                text = "Aún no estás suscrito a ningún Haven",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline
+            )
+        } else {
+            HavenList(
+                havens = havens,
+                onOpenChat = onOpenChat,
+                onOpenDetails = { haven ->
+                    selectedHaven = haven
+                    havenDetails = havenDetails.copy(isLoading = true, haven = haven)
+
+                    // Cargar posts
+                    viewModel.viewModelScope.launch {
+                        when(val result = viewModel.havenRepository.getPosts(haven.id)) {
+                            is com.nicojero.mysafehaven.data.repository.HavenResult.Success -> {
+                                havenDetails = havenDetails.copy(posts = result.data, isLoading = false)
+                            }
+                            is com.nicojero.mysafehaven.data.repository.HavenResult.Error -> {
+                                havenDetails = havenDetails.copy(error = result.message, isLoading = false)
+                            }
+                        }
+                    }
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        InfoCard()
+    }
+
+    // Mostrar modal si hay haven seleccionado
+    selectedHaven?.let {
+        HavenDetailsModal(
+            havenDetails = havenDetails,
+            onDismiss = { selectedHaven = null }
+        )
+    }
+}
+
+@Composable
+private fun HavenDetailsModal(
+    havenDetails: com.nicojero.mysafehaven.presentation.viewmodel.HavenDetailsState,
+    onDismiss: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(onClick = onDismiss),
+        color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Bottom
         ) {
-            Row(
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxHeight(0.7f)
+                    .clickable(enabled = false) { },
+                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                color = MaterialTheme.colorScheme.surface
             ) {
-                Column {
-                    Text(
-                        text = "Mis Havens",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Ver y gestionar tus espacios seguros",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline
-                    )
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = havenDetails.haven?.name ?: "",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        IconButton(onClick = onDismiss) {
+                            Icon(Icons.Default.Close, contentDescription = "Cerrar")
+                        }
+                    }
+
+                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                    when {
+                        havenDetails.isLoading -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                        havenDetails.error != null -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = havenDetails.error,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+
+                        havenDetails.posts.isEmpty() -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("No hay posts en este Haven")
+                            }
+                        }
+
+                        else -> {
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(havenDetails.posts) { post ->
+                                    PostCard3(post)
+                                }
+                            }
+                        }
+                    }
                 }
-
-                Icon(
-                    Icons.Default.Place,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
             }
         }
-
-        // Información adicional
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
+    }
+}
+@Composable
+private fun PostCard3(post: Post) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = post.content,
+                style = MaterialTheme.typography.bodyLarge
             )
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "💡 ¿Qué es un Haven?",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Un Haven es una zona geográfica segura donde puedes compartir contenido y chatear con personas cercanas.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = formatDate(post.date),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
+    }
+}
+@Composable
+private fun formatDate(date: LocalDateTime?): String {
+    if (date == null) return ""
+    return try {
+        date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+    } catch (e: Exception) {
+        ""
     }
 }

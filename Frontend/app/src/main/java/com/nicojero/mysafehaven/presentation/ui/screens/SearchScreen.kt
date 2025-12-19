@@ -77,7 +77,8 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun SearchScreen(
-    viewModel: SearchViewModel = hiltViewModel()
+    viewModel: SearchViewModel = hiltViewModel(),
+    onNavigateToChat: (Int) -> Unit = {} // ✅ Parámetro añadido
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val havenDetails by viewModel.havenDetails.collectAsState()
@@ -136,6 +137,7 @@ fun SearchScreen(
                     NearbyHavensContent(
                         havens = state.nearbyHavens,
                         onHavenClick = { haven ->
+                            // Siempre mostrar detalles al tocar la tarjeta
                             viewModel.loadHavenDetails(haven)
                         },
                         onSubscribe = { havenId ->
@@ -143,6 +145,9 @@ fun SearchScreen(
                         },
                         onUnsubscribe = { havenId ->
                             viewModel.unsubscribeFromHaven(havenId)
+                        },
+                        onOpenChat = { havenId ->
+                            onNavigateToChat(havenId)
                         }
                     )
                 }
@@ -155,7 +160,7 @@ fun SearchScreen(
                 }
             }
 
-            // Modal de detalles del Haven
+            // Modal de detalles del Haven (solo para no suscritos)
             AnimatedVisibility(
                 visible = havenDetails.haven != null,
                 enter = slideInVertically(
@@ -267,7 +272,8 @@ private fun NearbyHavensContent(
     havens: List<Haven>,
     onHavenClick: (Haven) -> Unit,
     onSubscribe: (Int) -> Unit,
-    onUnsubscribe: (Int) -> Unit
+    onUnsubscribe: (Int) -> Unit,
+    onOpenChat: (Int) -> Unit // ✅ Parámetro añadido
 ) {
     if (havens.isEmpty()) {
         EmptyHavensView()
@@ -291,12 +297,14 @@ private fun NearbyHavensContent(
                     haven = haven,
                     onClick = { onHavenClick(haven) },
                     onSubscribe = { onSubscribe(haven.id) },
-                    onUnsubscribe = { onUnsubscribe(haven.id) }
+                    onUnsubscribe = { onUnsubscribe(haven.id) },
+                    onOpenChat = { onOpenChat(haven.id) } // ✅ Pasar callback
                 )
             }
         }
     }
 }
+
 @Composable
 private fun formatDate(date: LocalDateTime?): String {
     if (date == null) return ""
@@ -339,11 +347,12 @@ private fun EmptyHavensView() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HavenCard(
+public fun HavenCard(
     haven: Haven,
     onClick: () -> Unit,
     onSubscribe: () -> Unit,
-    onUnsubscribe: () -> Unit
+    onUnsubscribe: () -> Unit,
+    onOpenChat: () -> Unit // ✅ Parámetro añadido
 ) {
     Card(
         onClick = onClick,
@@ -370,23 +379,40 @@ private fun HavenCard(
                     )
                 }
 
-                if (haven.isSubscribed) {
-                    FilledIconButton(
-                        onClick = onUnsubscribe,
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = "Desuscribirse")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // ✅ Botón de chat (solo si está suscrito)
+                    if (haven.isSubscribed) {
+                        FilledIconButton(
+                            onClick = {
+                                onOpenChat()
+                            },
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary
+                            )
+                        ) {
+                            Icon(Icons.Default.ChatBubbleOutline, contentDescription = "Abrir chat")
+                        }
                     }
-                } else {
-                    FilledIconButton(
-                        onClick = onSubscribe,
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "Suscribirse")
+
+                    // Botón de suscripción
+                    if (haven.isSubscribed) {
+                        FilledIconButton(
+                            onClick = onUnsubscribe,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = "Desuscribirse")
+                        }
+                    } else {
+                        FilledIconButton(
+                            onClick = onSubscribe,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "Suscribirse")
+                        }
                     }
                 }
             }
@@ -409,6 +435,24 @@ private fun HavenCard(
 
             if (haven.isSubscribed) {
                 Spacer(modifier = Modifier.height(8.dp))
+
+                // Botón para abrir el chat
+                Button(
+                    onClick = { onOpenChat() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.ChatBubbleOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Abrir Chat")
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -427,9 +471,34 @@ private fun HavenCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Suscrito - Toca para ver posts",
+                        "✓ Suscrito - Toca la tarjeta para ver posts",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.ChatBubbleOutline,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Toca la tarjeta para ver posts públicos",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -550,24 +619,6 @@ private fun HavenDetailsModal(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun PostItem(post: Post) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = Icons.Default.ChatBubbleOutline,
-            contentDescription = "Post icon",
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = post.content, // <-- Display the 'content' property of the Post
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 

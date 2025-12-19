@@ -416,7 +416,7 @@ def get_posts(haven_id):
     
     return jsonify([p.to_dict() for p in posts]), 200
 
-# ==================== MENSAJES ====================
+# ==================== subscripciones ====================
 @app.route('/havens/<int:haven_id>/subscribe', methods=['POST'])
 @jwt_required()
 def subscribe_to_haven(haven_id):
@@ -465,6 +465,27 @@ def unsubscribe_from_haven(haven_id):
 
     return jsonify({"message": "Desuscripción exitosa"}), 200
 
+@app.route('/havens/subscribed', methods=['GET'])
+@jwt_required()
+def get_subscribed_havens():
+    current_user_id = int(get_jwt_identity())
+
+    subscriptions = (
+        db.session.query(Haven)
+        .join(Subscription, Subscription.haven_id == Haven.haven_id)
+        .filter(Subscription.user_id == current_user_id)
+        .all()
+    )
+
+    return jsonify([
+        {
+            **haven.to_dict(),
+            "is_subscribed": True
+        }
+        for haven in subscriptions
+    ]), 200
+
+# ==================== CHAT MESSAGES ====================
 
 @app.route('/havens/<int:haven_id>/messages', methods=['POST'])
 @jwt_required()

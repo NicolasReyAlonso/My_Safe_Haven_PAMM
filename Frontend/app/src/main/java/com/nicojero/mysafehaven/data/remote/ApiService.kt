@@ -68,6 +68,9 @@ interface ApiService {
     @DELETE("havens/{haven_id}/unsubscribe")
     suspend fun unsubscribeFromHaven(@Path("haven_id") havenId: Int): Response<SubscriptionResponse>
 
+    @GET("havens/subscribed")
+    suspend fun getSubscribedHavens(): Response<List<NearbyHavenDto>>
+
     // ========== POST ENDPOINTS ==========
     @POST("havens/{haven_id}/posts")
     suspend fun createPost(

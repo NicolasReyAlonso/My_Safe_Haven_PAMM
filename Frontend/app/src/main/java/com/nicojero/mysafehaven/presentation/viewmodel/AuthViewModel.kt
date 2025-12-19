@@ -53,12 +53,19 @@ class AuthViewModel @Inject constructor(
             val hasSession = authRepository.hasActiveSession()
 
             if (hasSession) {
-                // TODO: Obtener datos del usuario actual si es necesario
-                _sessionState.value = SessionState.LoggedIn(
-                    userId = "temp",
-                    username = "temp",
-                    email = "temp"
-                )
+                // ✅ Obtener el usuario actual desde la API
+                val user = authRepository.getCurrentUser()
+                if (user != null) {
+                    _sessionState.value = SessionState.LoggedIn(
+                        userId = user.id.toString(),
+                        username = user.username,
+                        email = user.mail
+                    )
+                } else {
+                    // Si falla la obtención del usuario, cerrar sesión
+                    authRepository.logout()
+                    _sessionState.value = SessionState.LoggedOut
+                }
             } else {
                 _sessionState.value = SessionState.LoggedOut
             }
@@ -107,7 +114,6 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    // ✅ NUEVA FUNCIÓN: Registrar con imagen
     fun registerWithImage(
         username: String,
         email: String,

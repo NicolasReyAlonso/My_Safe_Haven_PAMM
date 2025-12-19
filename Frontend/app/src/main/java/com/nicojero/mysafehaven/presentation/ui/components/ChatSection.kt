@@ -37,6 +37,9 @@ import androidx.compose.ui.unit.dp
 import com.nicojero.mysafehaven.presentation.viewmodel.AuthViewModel
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
 import com.nicojero.mysafehaven.presentation.viewmodel.SessionState
+import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
 
 @Composable
 fun ChatSection(
@@ -49,7 +52,8 @@ fun ChatSection(
 ) {
     val messages by havenViewModel.messages.collectAsState()
     val session by authViewModel.sessionState.collectAsState()
-    val myUserId = (session as? SessionState.LoggedIn)?.userId ?: -1
+    val myUserId = (session as? SessionState.LoggedIn)?.userId
+
 
     var text by remember { mutableStateOf("") }
 
@@ -58,9 +62,10 @@ fun ChatSection(
     }
 
     if (!isChatOpen) {
-        Column (modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
@@ -77,7 +82,7 @@ fun ChatSection(
             Spacer(modifier = Modifier.height(8.dp))
         }
     } else {
-        Card (
+        Card(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -92,21 +97,38 @@ fun ChatSection(
             ) {
                 HorizontalDivider()
 
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    reverseLayout = false
-                ) {
-                    items(messages) { message ->
-                        ChatBubble(
-                            message = message,
-                            isMine = message.userId == myUserId
-                        )
+                // ✅ Esperamos a que myUserId esté disponible
+                if (myUserId != null) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        reverseLayout = false
+                    ) {
+
+                        items(messages) { message ->
+                            Log.d("US", "messageuserid: "+ message.userId.toString() + "myid" + myUserId)
+                            ChatBubble(
+                                message = message,
+                                isMine = message.userId.toString() == myUserId
+                            )
+                        }
+                    }
+                } else {
+                    // Mientras cargamos el userId
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
 
+                // Fila de input
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

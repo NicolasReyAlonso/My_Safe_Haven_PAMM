@@ -86,14 +86,21 @@ fun NavigationGraph(
         // ========== MAIN SCREENS ==========
         composable(Screen.Home.route) {
             HomeScreen(
-                onNavigateToHavens = {
-                    navController.navigate(Screen.HavensList.route)
+                onOpenChat = { havenId ->
+                    navController.navigate("chat/$havenId")
                 }
+
             )
         }
 
+
+        // ✅ ACTUALIZADO: Pasar lambda de navegación al chat
         composable(Screen.Search.route) {
-            SearchScreen()
+            SearchScreen(
+                onNavigateToChat = { havenId ->
+                    navController.navigate("chat/$havenId")
+                }
+            )
         }
 
         composable(Screen.Profile.route) {
@@ -157,6 +164,7 @@ fun NavigationGraph(
             )
         }
 
+        // ✅ CHAT SCREEN (accesible desde Search y HavenDetail)
         composable(
             route = "chat/{havenId}",
             arguments = listOf(navArgument("havenId") { type = NavType.IntType })
@@ -180,6 +188,5 @@ fun NavigationGraph(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-
     }
 }
