@@ -139,7 +139,9 @@ data class PostDto(
     @SerializedName("haven_id")
     val havenId: Int,
     val content: String,
-    val date: String
+    val date: String,
+    @SerializedName("image_path")  // ✅ NUEVO CAMPO
+    val imagePath: String? = null
 )
 
 data class CreatePostResponse(

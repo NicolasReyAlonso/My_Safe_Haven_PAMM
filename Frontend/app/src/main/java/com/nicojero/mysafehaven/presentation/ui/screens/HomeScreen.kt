@@ -1,17 +1,22 @@
 package com.nicojero.mysafehaven.presentation.ui.screens
-
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import coil.compose.rememberAsyncImagePainter
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -232,27 +237,85 @@ private fun HavenDetailsModal(
     }
 }
 @Composable
-private fun PostCard3(post: Post) {
+fun PostCard3(post: Post) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Header del post
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = "Usuario",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = post.getRelativeTime(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Contenido del post
             Text(
                 text = post.content,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyMedium
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = formatDate(post.date),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+
+            // ✅ NUEVO: Mostrar imagen si existe
+            post.imagePath?.let { imagePath ->
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    // Construir la URL completa de la imagen
+                    val imageUrl = "http://10.0.2.2:5050/$imagePath" // Para emulador
+                    // val imageUrl = "http://TU_IP:5050/$imagePath" // Para dispositivo físico
+
+                    androidx.compose.foundation.Image(
+                        painter = rememberAsyncImagePainter(
+                            model = imageUrl,
+                            error = rememberVectorPainter(Icons.Default.Place)
+                        ),
+                        contentDescription = "Post image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                }
+            }
         }
     }
 }
+
 @Composable
 private fun formatDate(date: LocalDateTime?): String {
     if (date == null) return ""

@@ -74,6 +74,7 @@ class HavenPost(db.Model):
     post_id = db.Column(db.Integer, primary_key=True)
     haven_id = db.Column(db.Integer, db.ForeignKey('havens.haven_id', ondelete='CASCADE'), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    image_path = db.Column(db.String(500))  # ✅ NUEVO CAMPO
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
     def to_dict(self):
@@ -81,6 +82,7 @@ class HavenPost(db.Model):
             'post_id': self.post_id,
             'haven_id': self.haven_id,
             'content': self.content,
+            'image_path': self.image_path,  # ✅ INCLUIR EN RESPUESTA
             'date': self.date.isoformat()
         }
 

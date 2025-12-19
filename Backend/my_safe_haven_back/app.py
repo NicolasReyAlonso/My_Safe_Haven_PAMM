@@ -384,7 +384,6 @@ def get_nearby_havens():
 @app.route('/havens/<int:haven_id>/posts', methods=['POST'])
 @jwt_required()
 def create_post(haven_id):
-    # ✅ CAMBIO AQUÍ: Convertir a int
     current_user_id = int(get_jwt_identity())
     haven = Haven.query.get(haven_id)
     
@@ -394,16 +393,56 @@ def create_post(haven_id):
     if haven.user_id != current_user_id:
         return jsonify({"error": "No autorizado"}), 403
     
-    data = request.get_json()
-    if not data.get('content'):
-        return jsonify({"error": "Se requiere contenido"}), 400
+    # Detectar si viene como multipart (con imagen) o JSON
+    is_multipart = request.content_type and request.content_type.startswith('multipart/form-data')
     
-    post = HavenPost(haven_id=haven_id, content=data['content'])
+    if is_multipart:
+        # POST CON IMAGEN
+        form = request.form
+        content = form.get('content')
+        image = request.files.get('post_image')
+        
+        if not content:
+            return jsonify({"error": "Se requiere contenido"}), 400
+        
+        # Guardar imagen si existe
+        image_path = None
+        if image:
+            if not image.filename:
+                return jsonify({"error": "El archivo de imagen no tiene nombre"}), 400
+            if not allowed_file(image.filename):
+                return jsonify({"error": "Formato de imagen no permitido"}), 400
+            
+            filename = secure_filename(image.filename)
+            ext = filename.rsplit('.', 1)[1].lower()
+            unique_name = f"{uuid.uuid4().hex}.{ext}"
+            save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+            image.save(save_path)
+            image_path = f"{app.config['UPLOAD_FOLDER']}/{unique_name}"
+        
+        post = HavenPost(
+            haven_id=haven_id,
+            content=content,
+            image_path=image_path
+        )
+        
+        db.session.add(post)
+        db.session.commit()
+        
+        return jsonify({"message": "Post creado", "post": post.to_dict()}), 201
     
-    db.session.add(post)
-    db.session.commit()
-    
-    return jsonify({"message": "Post creado", "post": post.to_dict()}), 201
+    else:
+        # POST SIN IMAGEN (JSON)
+        data = request.get_json(silent=True)
+        if not data.get('content'):
+            return jsonify({"error": "Se requiere contenido"}), 400
+        
+        post = HavenPost(haven_id=haven_id, content=data['content'])
+        
+        db.session.add(post)
+        db.session.commit()
+        
+        return jsonify({"message": "Post creado", "post": post.to_dict()}), 201
 
 @app.route('/havens/<int:haven_id>/posts', methods=['GET'])
 @jwt_required()

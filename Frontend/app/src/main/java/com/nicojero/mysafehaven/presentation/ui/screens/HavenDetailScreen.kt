@@ -1,5 +1,8 @@
 package com.nicojero.mysafehaven.presentation.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,41 +63,50 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.nicojero.mysafehaven.domain.model.Post
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenUiState
 import com.nicojero.mysafehaven.presentation.viewmodel.HavenViewModel
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HavenDetailScreen(
-    havenId: Int,  // Cambiado: recibir el ID en lugar del objeto
+    havenId: Int,
     navController: NavHostController,
     viewModel: HavenViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onOpenChat: (havenId: Int) -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val havens by viewModel.havens.collectAsState()
     val posts by viewModel.posts.collectAsState()
     val postsState by viewModel.postsState.collectAsState()
     val createPostState by viewModel.createPostState.collectAsState()
 
-    // Buscar el haven por ID
     val haven = remember(havens, havenId) { havens.find { it.id == havenId } }
 
     var showCreatePostDialog by remember { mutableStateOf(false) }
     var postContent by remember { mutableStateOf("") }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }  // ✅ NUEVO
+
+    // ✅ Launcher para seleccionar imagen
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        selectedImageUri = uri
+    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
 
-    // Cargar havens si la lista está vacía
     LaunchedEffect(Unit) {
         if (havens.isEmpty()) {
             viewModel.loadHavens()
         }
     }
 
-    // Cargar posts cuando tengamos el haven
     LaunchedEffect(haven) {
         haven?.let {
             viewModel.selectHaven(it)
@@ -106,6 +118,7 @@ fun HavenDetailScreen(
         if (createPostState is HavenUiState.Success<*>) {
             showCreatePostDialog = false
             postContent = ""
+            selectedImageUri = null  // ✅ Limpiar imagen
             viewModel.resetCreatePostState()
         }
     }
@@ -116,7 +129,6 @@ fun HavenDetailScreen(
         }
     }
 
-    // Mostrar loading mientras cargamos el haven
     if (haven == null) {
         Scaffold(
             topBar = {
@@ -170,7 +182,7 @@ fun HavenDetailScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                // Haven Info Card
+                // Haven Info Card (igual que antes)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -179,9 +191,7 @@ fun HavenDetailScreen(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 Icons.Default.Place,
@@ -207,9 +217,7 @@ fun HavenDetailScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         HorizontalDivider()
                         Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             InfoChip(
                                 icon = Icons.Default.LocationOn,
                                 text = String.format("%.6f", haven.latitude)
@@ -224,10 +232,7 @@ fun HavenDetailScreen(
                             horizontalArrangement = Arrangement.End
                         ) {
                             Button(onClick = { onOpenChat(haven.id) }) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.Chat,
-                                    contentDescription = "Abrir chat"
-                                )
+                                Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = "Abrir chat")
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Chat")
                             }
@@ -318,26 +323,73 @@ fun HavenDetailScreen(
         }
     }
 
-    // Create Post Dialog
+    // ✅ Create Post Dialog ACTUALIZADO con selector de imagen
     if (showCreatePostDialog) {
         AlertDialog(
-            onDismissRequest = { showCreatePostDialog = false },
+            onDismissRequest = {
+                showCreatePostDialog = false
+                selectedImageUri = null
+            },
             title = { Text("Crear Post") },
             text = {
-                OutlinedTextField(
-                    value = postContent,
-                    onValueChange = { postContent = it },
-                    label = { Text("¿Qué está pasando?") },
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    maxLines = 8
-                )
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = postContent,
+                        onValueChange = { postContent = it },
+                        label = { Text("¿Qué está pasando?") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3,
+                        maxLines = 8
+                    )
+
+                    // ✅ Botón para seleccionar imagen
+                    Button(
+                        onClick = { imagePickerLauncher.launch("image/*") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(if (selectedImageUri == null) "Agregar imagen" else "Cambiar imagen")
+                    }
+
+                    // ✅ Preview de la imagen seleccionada
+                    selectedImageUri?.let { uri ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                        ) {
+                            androidx.compose.foundation.Image(
+                                painter = rememberAsyncImagePainter(uri),
+                                contentDescription = "Preview",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
+                        }
+                    }
+                }
             },
             confirmButton = {
                 Button(
                     onClick = {
                         if (postContent.isNotBlank()) {
-                            haven?.let { viewModel.createPost(it.id, postContent) }
+                            haven?.let {
+                                if (selectedImageUri != null) {
+                                    // Crear post con imagen
+                                    viewModel.createPostWithImage(
+                                        it.id,
+                                        postContent,
+                                        selectedImageUri!!,
+                                        context
+                                    )
+                                } else {
+                                    // Crear post sin imagen
+                                    viewModel.createPost(it.id, postContent)
+                                }
+                            }
                         }
                     },
                     enabled = postContent.isNotBlank() &&
@@ -354,7 +406,10 @@ fun HavenDetailScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showCreatePostDialog = false }) {
+                TextButton(onClick = {
+                    showCreatePostDialog = false
+                    selectedImageUri = null
+                }) {
                     Text("Cancelar")
                 }
             }
@@ -400,9 +455,8 @@ fun PostCard(post: Post) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            // Header del post
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -435,10 +489,37 @@ fun PostCard(post: Post) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Contenido del post
             Text(
                 text = post.content,
                 style = MaterialTheme.typography.bodyMedium
             )
+
+            // ✅ NUEVO: Mostrar imagen si existe
+            post.imagePath?.let { imagePath ->
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    // Construir la URL completa de la imagen
+                    val imageUrl = "http://10.0.2.2:5050/$imagePath" // Para emulador
+                    // val imageUrl = "http://TU_IP:5050/$imagePath" // Para dispositivo físico
+
+                    androidx.compose.foundation.Image(
+                        painter = rememberAsyncImagePainter(
+                            model = imageUrl,
+                            error = rememberVectorPainter(Icons.Default.Place)
+                        ),
+                        contentDescription = "Post image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                }
+            }
         }
     }
 }

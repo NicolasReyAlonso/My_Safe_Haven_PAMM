@@ -1,5 +1,7 @@
 package com.nicojero.mysafehaven.presentation.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nicojero.mysafehaven.data.location.LocationManager
@@ -201,7 +203,28 @@ class HavenViewModel @Inject constructor(
             when (val result = havenRepository.createPost(havenId, content)) {
                 is HavenResult.Success -> {
                     _createPostState.value = HavenUiState.Success(result.data)
-                    loadPosts(havenId) // Recargar posts
+                    loadPosts(havenId)
+                }
+                is HavenResult.Error -> {
+                    _createPostState.value = HavenUiState.Error(result.message)
+                }
+            }
+        }
+    }
+
+    // ✅ NUEVO: Crear post con imagen
+    fun createPostWithImage(
+        havenId: Int,
+        content: String,
+        imageUri: Uri,
+        context: Context
+    ) {
+        viewModelScope.launch {
+            _createPostState.value = HavenUiState.Loading
+            when (val result = havenRepository.createPostWithImage(havenId, content, imageUri, context)) {
+                is HavenResult.Success -> {
+                    _createPostState.value = HavenUiState.Success(result.data)
+                    loadPosts(havenId)
                 }
                 is HavenResult.Error -> {
                     _createPostState.value = HavenUiState.Error(result.message)

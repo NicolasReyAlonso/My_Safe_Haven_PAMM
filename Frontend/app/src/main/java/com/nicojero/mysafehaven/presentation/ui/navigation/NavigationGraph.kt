@@ -89,7 +89,6 @@ fun NavigationGraph(
                 onOpenChat = { havenId ->
                     navController.navigate("chat/$havenId")
                 }
-
             )
         }
 

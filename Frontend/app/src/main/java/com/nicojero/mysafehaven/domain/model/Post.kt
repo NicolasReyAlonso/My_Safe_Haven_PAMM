@@ -1,31 +1,27 @@
 package com.nicojero.mysafehaven.domain.model
 
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
+import java.time.temporal.ChronoUnit
 
 data class Post(
     val id: Int,
     val havenId: Int,
     val content: String,
+    val imagePath: String? = null,  // ✅ NUEVO CAMPO
     val date: LocalDateTime
 ) {
-    fun getFormattedDate(): String {
-        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-        return date.format(formatter)
-    }
-
     fun getRelativeTime(): String {
         val now = LocalDateTime.now()
-        val minutes = java.time.Duration.between(date, now).toMinutes()
+        val minutes = ChronoUnit.MINUTES.between(date, now)
+        val hours = ChronoUnit.HOURS.between(date, now)
+        val days = ChronoUnit.DAYS.between(date, now)
 
         return when {
-            minutes < 1 -> "Ahora"
-            minutes < 60 -> "${minutes}m"
-            minutes < 1440 -> "${minutes / 60}h"
-            minutes < 10080 -> "${minutes / 1440}d"
-            minutes < 43200 -> "${minutes / 10080}sem"
-            else -> getFormattedDate()
+            minutes < 1 -> "Justo ahora"
+            minutes < 60 -> "Hace $minutes min"
+            hours < 24 -> "Hace $hours h"
+            days < 7 -> "Hace $days d"
+            else -> date.toString()
         }
     }
 }

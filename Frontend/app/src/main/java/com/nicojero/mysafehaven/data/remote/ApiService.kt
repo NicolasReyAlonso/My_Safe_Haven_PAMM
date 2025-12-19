@@ -72,15 +72,24 @@ interface ApiService {
     suspend fun getSubscribedHavens(): Response<List<NearbyHavenDto>>
 
     // ========== POST ENDPOINTS ==========
-    @POST("havens/{haven_id}/posts")
+    // ==================== POSTS ====================
+    @GET("havens/{id}/posts")
+    suspend fun getPosts(@Path("id") havenId: Int): Response<List<PostDto>>
+
+    @POST("havens/{id}/posts")
     suspend fun createPost(
-        @Path("haven_id") havenId: Int,
+        @Path("id") havenId: Int,
         @Body request: CreatePostRequest
     ): Response<CreatePostResponse>
 
-    @GET("havens/{haven_id}/posts")
-    suspend fun getPosts(@Path("haven_id") havenId: Int): Response<List<PostDto>>
-
+    // ✅ NUEVO: Crear post con imagen
+    @Multipart
+    @POST("havens/{id}/posts")
+    suspend fun createPostWithImage(
+        @Path("id") havenId: Int,
+        @Part("content") content: RequestBody,
+        @Part postImage: MultipartBody.Part
+    ): Response<CreatePostResponse>
     // ========== CHAT ENDPOINTS ==========
     @GET("havens/{havenId}/messages")
     suspend fun getMessages(

@@ -1,11 +1,18 @@
 package com.nicojero.mysafehaven.data.repository
 
+import android.content.Context
+import android.net.Uri
 import com.nicojero.mysafehaven.data.remote.ApiService
 import com.nicojero.mysafehaven.data.remote.dto.*
 import com.nicojero.mysafehaven.domain.model.ChatMessage
 import com.nicojero.mysafehaven.domain.model.Haven
 import com.nicojero.mysafehaven.domain.model.HavenLimits
 import com.nicojero.mysafehaven.domain.model.Post
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -179,10 +186,48 @@ class HavenRepository @Inject constructor(
 
     // ========== POST OPERATIONS ==========
 
+    // ========== POST OPERATIONS ==========
+
     suspend fun createPost(havenId: Int, content: String): HavenResult<Post> {
         return try {
             val request = CreatePostRequest(content)
             val response = apiService.createPost(havenId, request)
+
+            if (response.isSuccessful && response.body() != null) {
+                val postDto = response.body()!!.post
+                HavenResult.Success(postDto.toDomainModel())
+            } else {
+                HavenResult.Error("Error al crear post", response.code())
+            }
+        } catch (e: Exception) {
+            HavenResult.Error(e.message ?: "Error de conexión")
+        }
+    }
+
+    // ✅ NUEVO: Crear post con imagen
+    suspend fun createPostWithImage(
+        havenId: Int,
+        content: String,
+        imageUri: Uri,
+        context: Context
+    ): HavenResult<Post> {
+        return try {
+            val contentResolver = context.contentResolver
+            val inputStream = contentResolver.openInputStream(imageUri)
+            val file = File(context.cacheDir, "post_image_${System.currentTimeMillis()}.jpg")
+            inputStream?.use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            val requestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+            val imagePart = MultipartBody.Part.createFormData("post_image", file.name, requestBody)
+            val contentPart = content.toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val response = apiService.createPostWithImage(havenId, contentPart, imagePart)
+
+            file.delete()
 
             if (response.isSuccessful && response.body() != null) {
                 val postDto = response.body()!!.post
@@ -208,6 +253,16 @@ class HavenRepository @Inject constructor(
             HavenResult.Error(e.message ?: "Error de conexión")
         }
     }
+
+    // ========== MAPPERS ==========
+
+    private fun PostDto.toDomainModel() = Post(
+        id = postId,
+        havenId = havenId,
+        content = content,
+        imagePath = imagePath,  // ✅ MAPEAR IMAGEN
+        date = parseDate(date)
+    )
 
     // ========== MAPPERS ==========
 
@@ -248,13 +303,6 @@ class HavenRepository @Inject constructor(
         }
     }
 
-
-    private fun PostDto.toDomainModel() = Post(
-        id = postId,
-        havenId = havenId,
-        content = content,
-        date = parseDate(date)
-    )
 
     private fun ChatMessageDto.toDomainModel() = ChatMessage(
         id = messageId,
