@@ -1,0 +1,171 @@
+\section{Despliegue}
+
+El backend desarrollado ha sido probado y desplegado en tres entornos diferentes:
+
+\begin{itemize}
+    \item Entorno local.
+    \item Entorno remoto sobre una máquina física.
+    \item Entorno remoto en la nube mediante Amazon Web Services (AWS).
+\end{itemize}
+
+\subsection{Despliegue local y remoto en máquina física}
+
+El despliegue en una máquina física remota sigue los mismos pasos que el despliegue en local, descritos previamente en la Sección~\ref{sec:compilacion}.  
+En ambos casos, la aplicación se ejecuta utilizando contenedores Docker y se comunica con la base de datos mediante los puertos previamente configurados.
+Lo único de lo que hay que asegurarse es de tener los puertos abiertos en el router y una servicio de dns dinámico, o en su defecto, una ip estática
+
+\subsection{Despliegue en Amazon Web Services}
+
+Para ejecutar el backend en una plataforma cloud como AWS, es necesario desplegar previamente una infraestructura básica que proporcione los servicios necesarios.  
+Esta infraestructura se define de forma declarativa mediante un template de \textit{AWS CloudFormation}, el cual automatiza la creación de los siguientes recursos:
+
+\begin{itemize}
+    \item Un repositorio \textbf{Amazon ECR} para almacenar la imagen Docker del backend.
+    \item Una base de datos \textbf{Amazon RDS PostgreSQL}.
+    \item Un clúster \textbf{Amazon ECS} con \textit{Fargate} para la ejecución del contenedor.
+    \item La red necesaria (VPC, subredes y grupos de seguridad).
+\end{itemize}
+
+A continuación se muestra un ejemplo de template CloudFormation que implementa esta arquitectura básica:
+
+\begin{lstlisting}[language=yaml, caption={Template CloudFormation de ejemplo para el despliegue del backend en AWS}]
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Backend con ECR, RDS PostgreSQL y ECS Fargate
+
+Parameters:
+  DBUsername:
+    Type: String
+    Default: appuser
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+
+  DBName:
+    Type: String
+    Default: appdb
+
+Resources:
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+
+  BackendSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: Backend access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+
+  RDSSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: RDS access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref BackendSG
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: RDS subnet group
+      SubnetIds:
+        - !Ref PublicSubnet
+
+  PostgreSQL:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: postgres
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      DBName: !Ref DBName
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      VPCSecurityGroups:
+        - !Ref RDSSG
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      PubliclyAccessible: true
+      BackupRetentionPeriod: 0
+
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: backend-repo
+
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: "256"
+      Memory: "512"
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: backend
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/backend-repo:latest"
+          PortMappings:
+            - ContainerPort: 8080
+          Environment:
+            - Name: DATABASE_URL
+              Value: !Sub
+                - "postgresql://${User}:${Pass}@${Host}:5432/${DB}"
+                - User: !Ref DBUsername
+                  Pass: !Ref DBPassword
+                  Host: !GetAtt PostgreSQL.Endpoint.Address
+                  DB: !Ref DBName
+
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: PostgreSQL
+    Properties:
+      Cluster: !Ref ECSCluster
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: !Ref TaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref PublicSubnet
+          SecurityGroups:
+            - !Ref BackendSG
+
+Outputs:
+  ECRUri:
+    Value: !GetAtt ECRRepository.RepositoryUri
+
+  RDSEndpoint:
+    Value: !GetAtt PostgreSQL.Endpoint.Address
+\end{lstlisting}

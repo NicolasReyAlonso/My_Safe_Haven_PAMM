@@ -15,6 +15,23 @@
 \usepackage{xcolor}
 \usepackage[most]{tcolorbox}
 
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\ttfamily\small,
+  commentstyle=\color{gray},
+  stringstyle=\color{red},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+}
+
+\lstset{
+  frame=single,
+  breaklines=true,
+  captionpos=b
+}
+
 
 
 \setcounter{secnumdepth}{4}
@@ -43,5 +60,7 @@
 \newpage
 \input{sprintplan/sprintplanMain}
 \include{arquitectura}
-
+\include{CompilacionYLanzamiento}
+\include{Despligue}
+\include{TrabajoPorFinalizar}
 \end{document}

@@ -1,0 +1,44 @@
+\section{Compilación y despliegue}
+\label{sec:compilacion}
+Para poder compilar y ejecutar la aplicación es necesario disponer de los siguientes requisitos:
+
+\begin{itemize}
+    \item Docker CLI o Docker Desktop.
+    \item Android Studio.
+\end{itemize}
+
+De forma adicional, se recomienda contar con los siguientes elementos para facilitar las tareas de depuración y pruebas:
+
+\begin{itemize}
+    \item Python.
+    \item Un dispositivo Android físico o una máquina virtual (emulador).
+    \item Los puertos \texttt{5432} y \texttt{5050} libres, destinados al backend y al servidor PostgreSQL, respectivamente.
+\end{itemize}
+
+\subsection{Pasos para la compilación}
+
+Una vez verificados los requisitos previos, el proceso de compilación y despliegue se realiza siguiendo los pasos que se detallan a continuación:
+
+\begin{enumerate}
+    \item Iniciar Docker Desktop o arrancar el \textit{daemon} de Docker.
+    
+    \item Navegar hasta la carpeta raíz del proyecto y ejecutar el siguiente comando:
+    \begin{quote}
+        \texttt{docker compose up}
+    \end{quote}
+    
+    \item Obtener la dirección IP de la máquina en la que se va a ejecutar la aplicación\footnote{Esta IP será utilizada por la aplicación móvil para comunicarse con el backend.}.
+    
+    \item Abrir Android Studio.
+    
+    \item Ejecutar el proceso de compilación mediante Gradle.
+    
+    \item Sustituir la IP base configurada en el archivo 
+    \begin{quote}
+        \texttt{com.nicojero.mysafehaven.remote.RetrofitClient.kt} 
+    \end{quote}
+
+    por la dirección IP obtenida previamente\footnote{Es necesario repetir este paso si la IP de la máquina cambia.}.
+    
+    \item Ejecutar la aplicación en un dispositivo físico o en un emulador Android.
+\end{enumerate}
