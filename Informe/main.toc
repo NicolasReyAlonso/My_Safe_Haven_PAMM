@@ -7,6 +7,7 @@
 \contentsline {subsubsection}{\numberline {2.3.1}Historias}{13}{subsubsection.2.3.1}%
 \contentsline {paragraph}{\numberline {2.3.1.1}Completadas}{13}{paragraph.2.3.1.1}%
 \contentsline {paragraph}{\numberline {2.3.1.2}No Completadas}{13}{paragraph.2.3.1.2}%
+\contentsline {subsubsection}{\numberline {2.3.2}Velocidad de Trabajo}{13}{subsubsection.2.3.2}%
 \contentsline {section}{\numberline {3}Arquitectura}{14}{section.3}%
 \contentsline {subsection}{\numberline {3.1}MVVM}{14}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Clean Architecture}{14}{subsection.3.2}%
