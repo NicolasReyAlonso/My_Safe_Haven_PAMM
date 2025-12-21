@@ -1,39 +1,40 @@
 \babel@toc {spanish}{}\relax 
 \contentsline {section}{\numberline {1}Descripción del proyecto}{2}{section.1}%
-\contentsline {section}{\numberline {2}Plan de Sprint}{3}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Plan de trabajo}{3}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Sprint 0}{4}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Retrospectiva Sprint0:}{13}{subsection.2.3}%
-\contentsline {subsubsection}{\numberline {2.3.1}Historias}{13}{subsubsection.2.3.1}%
-\contentsline {paragraph}{\numberline {2.3.1.1}Completadas}{13}{paragraph.2.3.1.1}%
-\contentsline {paragraph}{\numberline {2.3.1.2}No Completadas}{13}{paragraph.2.3.1.2}%
-\contentsline {subsubsection}{\numberline {2.3.2}Velocidad de Trabajo}{14}{subsubsection.2.3.2}%
-\contentsline {subsubsection}{\numberline {2.3.3}Evaluación del Sprint}{14}{subsubsection.2.3.3}%
-\contentsline {subsubsection}{\numberline {2.3.4}Conclusiones}{14}{subsubsection.2.3.4}%
-\contentsline {section}{\numberline {3}Arquitectura}{15}{section.3}%
-\contentsline {subsection}{\numberline {3.1}MVVM}{15}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Clean Architecture}{15}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Jetpack (Compose/Views)}{15}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Estructura del proyecto}{16}{subsection.3.4}%
-\contentsline {subsubsection}{\numberline {3.4.1}Estructura de la carpeta Frontend}{17}{subsubsection.3.4.1}%
-\contentsline {section}{\numberline {4}Compilación y despliegue}{19}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Pasos para la compilación}{19}{subsection.4.1}%
-\contentsline {section}{\numberline {5}Despliegue}{20}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Despliegue local y remoto en máquina física}{20}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Despliegue en Amazon Web Services}{20}{subsection.5.2}%
-\contentsline {section}{\numberline {6}Trabajo realizado}{24}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Backend}{24}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Frontend}{24}{subsection.6.2}%
-\contentsline {section}{\numberline {7}Trabajo pendiente}{24}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Backend}{24}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Frontend}{25}{subsection.7.2}%
-\contentsline {subsection}{\numberline {7.3}Mejoras adicionales}{25}{subsection.7.3}%
-\contentsline {section}{\numberline {8}Uso de Inteligencia Artificial}{26}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Desarrollo}{26}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Documentación}{26}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}Presentación}{26}{subsection.8.3}%
-\contentsline {section}{\numberline {9}Herramientas}{27}{section.9}%
-\contentsline {subsection}{\numberline {9.1}Lenguajes de Programación:}{27}{subsection.9.1}%
-\contentsline {subsection}{\numberline {9.2}Herramientas de Desarrollo:}{27}{subsection.9.2}%
-\contentsline {section}{\numberline {10}Referencias y Enlaces}{28}{section.10}%
-\contentsline {section}{\numberline {11}Conclusiones}{29}{section.11}%
+\contentsline {subsection}{\numberline {1.1}Pantallazos e Imágenes:}{3}{subsection.1.1}%
+\contentsline {section}{\numberline {2}Plan de Sprint}{6}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Plan de trabajo}{6}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Sprint 0}{7}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Retrospectiva Sprint0:}{16}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Historias}{16}{subsubsection.2.3.1}%
+\contentsline {paragraph}{\numberline {2.3.1.1}Completadas}{16}{paragraph.2.3.1.1}%
+\contentsline {paragraph}{\numberline {2.3.1.2}No Completadas}{16}{paragraph.2.3.1.2}%
+\contentsline {subsubsection}{\numberline {2.3.2}Velocidad de Trabajo}{17}{subsubsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.3}Evaluación del Sprint}{17}{subsubsection.2.3.3}%
+\contentsline {subsubsection}{\numberline {2.3.4}Conclusiones}{17}{subsubsection.2.3.4}%
+\contentsline {section}{\numberline {3}Arquitectura}{18}{section.3}%
+\contentsline {subsection}{\numberline {3.1}MVVM}{18}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Clean Architecture}{18}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Jetpack (Compose/Views)}{18}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Estructura del proyecto}{19}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}Estructura de la carpeta Frontend}{20}{subsubsection.3.4.1}%
+\contentsline {section}{\numberline {4}Compilación y despliegue}{22}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Pasos para la compilación}{22}{subsection.4.1}%
+\contentsline {section}{\numberline {5}Despliegue}{23}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Despliegue local y remoto en máquina física}{23}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Despliegue en Amazon Web Services}{23}{subsection.5.2}%
+\contentsline {section}{\numberline {6}Trabajo realizado}{27}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Backend}{27}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Frontend}{27}{subsection.6.2}%
+\contentsline {section}{\numberline {7}Trabajo pendiente}{27}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Backend}{27}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Frontend}{28}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Mejoras adicionales}{28}{subsection.7.3}%
+\contentsline {section}{\numberline {8}Uso de Inteligencia Artificial}{29}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Desarrollo}{29}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Documentación}{29}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Presentación}{29}{subsection.8.3}%
+\contentsline {section}{\numberline {9}Herramientas}{30}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Lenguajes de Programación:}{30}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Herramientas de Desarrollo:}{30}{subsection.9.2}%
+\contentsline {section}{\numberline {10}Referencias y Enlaces}{31}{section.10}%
+\contentsline {section}{\numberline {11}Conclusiones}{33}{section.11}%
