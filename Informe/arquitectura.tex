@@ -45,3 +45,90 @@ tecnologías son:
 \end{itemize}
 
 \subsection{Estructura del proyecto}
+La estructura del proyecto sigue las capas definidas por la \textit{Clean Architecture}, organizando el código en
+módulos claramente diferenciados:
+\begin{itemize}
+    \item \textbf{Capa de Dominio:} Contiene las entidades y casos de uso que encapsulan la lógica de negocio.
+    \item \textbf{Capa de Datos:} Gestiona la persistencia y recuperación de datos, incluyendo repositorios e integraciones con APIs externas.
+    \item \textbf{Capa de Presentación:} Incluye las vistas, \textit{ViewModels} y componentes UI, utilizando \textit{Jetpack Compose} y vistas tradicionales.
+\end{itemize}
+Esta organización modular facilita la colaboración entre desarrolladores, mejora la mantenibilidad del código y 
+permite una evolución más sencilla y controlada del proyecto a lo largo del tiempo. \newline
+Asimismo, la alta presión de tiempo nos ha llevado a tomar decisiones rápidas en cuanto a la arquitectura y 
+tecnologías a utilizar, acabando con una estructura de proyecto un poco "espagueti" en ciertos puntos, pero funcional y
+adaptada a nuestras necesidades inmediatas. De forma concreta el proyecto se estructura en las siguientes 
+carpetas principales:
+\begin{itemize}
+    \item \textbf{Backend:} Contiene el código del backend desarrollado en python Flask, 
+    incluyendo rutas, controladores y modelos de datos, así como el Dockerfile para su despliegue.
+    \item \textbf{Frontend:} Incluye todo el código de la aplicación móvil.
+    \item \textbf{Informe:} Contiene el código fuente del informe en LaTeX.
+    \item \textbf{Documentación:} Incluye documentación adicional, diagramas y recursos relacionados con el proyecto.
+    \item \textbf{Presentación:} Contiene los archivos de la presentación del proyecto en LaTeX.
+\end{itemize}
+Como la parte más relevante del proyecto es la aplicación móvil, a continuación se detalla la estructura interna de la 
+carpeta \textbf{Frontend}:
+\subsubsection{Estructura de la carpeta Frontend}
+
+En la carpeta \textbf{Frontend} el código sigue una organización basada en MVVM y Clean Architecture. 
+El paquete raíz es
+\begin{center}
+    \texttt{com.nicojero.mysafehaven}
+\end{center}
+A continuación se muestra la estructura de directorios principal y una breve explicación de la responsabilidad de cada carpeta, indicando cómo encaja en MVVM:
+
+\begin{figure}[h]
+\centering
+\begin{forest}
+for tree={
+    grow'=east,
+    parent anchor=east,
+    child anchor=west,
+    edge={-latex},
+    l sep=2mm,
+    s sep=1mm,
+    anchor=west,
+    calign=first,
+    font=\scriptsize
+}
+[com.nicojero.mysafehaven
+    [data
+        [local [AuthDataStore.kt]]
+        [location [LocationManager.kt]]
+        [remote [ApiService.kt] [dto [ApiModels.kt]] [RetrofitClient.kt]]
+        [repository [AuthRepository.kt] [HavenRepository.kt] [UserRepository.kt]]
+    ]
+    [di [AppModule.kt]]
+    [domain [model [ChatMessage.kt] [Haven.kt] [Notification.kt] [Post.kt] [User.kt]]]
+    [MainActivity.kt]
+    [MyApplication.kt]
+    [presentation
+        [ui
+            [components [BottomNavigation.kt] [ChatBubble.kt] [ChatSection.kt] [TopBar.kt]]
+            [MainScaffold.kt]
+            [navigation [NavigationGraph.kt] [Screen.kt]]
+            [screens [ChatScreen.kt] [CreateHavenScreen.kt] [HavenDetailScreen.kt] [HavenListScreen.kt] [HomeScreen.kt] [LoginScreen.kt] [ProfileScreen.kt] [RegisterScreen.kt] [SearchScreen.kt] [SplashScreen.kt] [UpdateHavenScreen.kt]]
+            [theme [Theme.kt]]
+        ]
+        [viewmodel [AuthViewModel.kt] [HavenViewModel.kt] [HomeViewModel.kt] [SearchViewModel.kt] [UserViewModel.kt]]
+    ]
+]
+\end{forest}
+\caption{Estructura del paquete \texttt{com.nicojero.mysafehaven}}
+\end{figure}
+
+Breve descripción y correspondencia con MVVM / Clean Architecture:
+\begin{itemize}
+  \item \textbf{data/}: Implementación de fuentes de datos — almacenamiento local (preferences, DataStore), gestión de ubicación y clientes remotos (Retrofit). Aquí también están los \textit{repositories} que abstraen el acceso a datos y aplican transformaciones necesarias.
+  \item \textbf{domain/model/}: Entidades del dominio (modelos puros) que representan los conceptos de la aplicación (Haven, Post, User, etc.). En una práctica completa, los casos de uso (use-cases) vivirían aquí.
+  \item \textbf{presentation/}: Contiene la UI y los \textit{ViewModels}. Las \textit{screens} y componentes son la 
+  "View" (Compose/Views), y los archivos en \texttt{viewmodel/} implementan la lógica de presentación y 
+  exponen estados/acciones.
+  \item \textbf{di/}: Configuración de inyección de dependencias (p. ej. Hilt o Koin) para proveer repositorios, 
+  clientes API y ViewModels. Asimismo, tambien incluimos algunos modelo tras una refactorización por falta de tiempo.
+  somos conscientes de que no es la estructura ideal, pero es funcional y cumple con los requisitos del proyecto.
+  \item \textbf{MainActivity.kt} y \textbf{MyApplication.kt}: puntos de entrada de la app; inicializan navegación, 
+  tema global e inyección de dependencias.
+\end{itemize}
+
+Esta organización facilita separar responsabilidades.

@@ -55,6 +55,10 @@
 \end{longtable}
 \end{center}
 
+\begin{center}
+\small\textbf{Tabla 1:} Historias completadas en el Sprint 0.
+\end{center}
+
 \paragraph{No Completadas}
 \begin{center}
 \renewcommand{\arraystretch}{1.3} % Espacio vertical entre filas
@@ -78,12 +82,50 @@
 \end{longtable}
 \end{center}
 
+\begin{center}
+\small\textbf{Tabla 2:} Historias no completadas en el Sprint 0.
+\end{center}
+
 \subsubsection{Velocidad de Trabajo}
 
-Puntos de historia completados: 90 puntos
+Definimos las cantidades:
+\begin{itemize}
+	\item $P$: puntos de historia completados en el sprint.
+	\item $T$: tiempo total real invertido (en horas).
+\end{itemize}
 
-Tiempo invertido: 86 horas reales
+En nuestro sprint:
+\[
+	P = 90,\qquad T = 86\ \text{horas}
+\]
 
-Horas por punto de historia: $\frac{86}{90} \approx 0{,}96$ horas/punto
+La métrica ``horas por punto'' se calcula como
+\[
+	h = \frac{T}{P} = \frac{86}{90} \approx 0{,}96\ \text{horas/punto}.
+\]
 
-Velocidad de Sprint: 90 puntos/sprint
+Para facilitar la interpretación también expresamos $h$ en minutos:
+\[
+	h \approx 0{,}96\ \text{horas/punto} = 0{,}96\times60 \approx 57{,}6\ \text{minutos/punto} \approx 58\ \text{minutos/punto (redondeado)}.
+\]
+
+La velocidad del sprint (puntos completados por sprint) es
+\[
+	V = P = 90\ \text{puntos/sprint}.
+\]
+
+Interpretación: en promedio cada punto de historia requiere aproximadamente 0{,}96 horas (unos 58 minutos). Esta medida permite estimar el tiempo total necesario cuando planifiquemos futuros sprints y ajustar la granularidad de las historias si es necesario.
+
+Nota: los valores están redondeados para lectura; conservar los valores exactos (\(86/90\)) al calcular estimaciones más precisas.
+
+\subsubsection{Evaluación del Sprint}
+Durante el Sprint 0, logramos completar la mayoría de las historias planificadas, alcanzando un total de 90 puntos de 
+historia. Sin embargo, algunas tareas quedaron incompletas debido a subestimaciones en el tiempo requerido y 
+desafíos técnicos imprevistos. Cabe destacar que hemos tenido poco tiempo para la realización de este proyecto,
+y tomamos decisiones, como el uso de Docker para el backend propio desarrollado para este proyecto, 
+que nos han supuesto un esfuerzo adicional. Adicionalmente, la presión sugerida por la proximidad de fechas de entrega
+de otras asignaturas ha afectado nuestra productividad.
+
+\subsubsection{Conclusiones}
+Para futuros sprints, ya conocemos la velocidad de trabajo del equipo, lo que nos permitirá planificar de manera 
+más precisa el tiempo requerido para la implementación de las tareas.
