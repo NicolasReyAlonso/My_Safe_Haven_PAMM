@@ -279,6 +279,12 @@ INPUT /usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryfadings.
 INPUT /usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryfadings.code.tex
 OUTPUT main.pdf
 INPUT /usr/share/texlive/texmf-dist/tex/latex/tcolorbox/tcbposter.code.tex
+INPUT /usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty
+INPUT /usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty
+INPUT /usr/share/texlive/texmf-dist/tex/latex/titlesec/titlesec.sty
+INPUT /usr/share/texlive/texmf-dist/tex/latex/titlesec/titlesec.sty
+INPUT /usr/share/texlive/texmf-dist/tex/latex/tocloft/tocloft.sty
+INPUT /usr/share/texlive/texmf-dist/tex/latex/tocloft/tocloft.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT /usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT ./main.aux
@@ -296,6 +302,9 @@ INPUT projectdescription.aux
 INPUT ./sprintplan/sprint0.aux
 INPUT ./sprintplan/sprint0.aux
 INPUT sprintplan/sprint0.aux
+INPUT ./sprintplan/RetrospectivaSprint0.aux
+INPUT ./sprintplan/RetrospectivaSprint0.aux
+INPUT sprintplan/RetrospectivaSprint0.aux
 INPUT ./arquitectura.aux
 INPUT ./arquitectura.aux
 INPUT arquitectura.aux
@@ -388,6 +397,12 @@ OUTPUT sprintplan/sprint0.aux
 INPUT ./sprintplan/sprint0.tex
 INPUT ./sprintplan/sprint0.tex
 INPUT sprintplan/sprint0.tex
+INPUT ./sprintplan/RetrospectivaSprint0.tex
+INPUT ./sprintplan/RetrospectivaSprint0.tex
+OUTPUT sprintplan/RetrospectivaSprint0.aux
+INPUT ./sprintplan/RetrospectivaSprint0.tex
+INPUT ./sprintplan/RetrospectivaSprint0.tex
+INPUT sprintplan/RetrospectivaSprint0.tex
 INPUT ./arquitectura.tex
 INPUT ./arquitectura.tex
 OUTPUT arquitectura.aux
@@ -437,6 +452,9 @@ INPUT projectdescription.aux
 INPUT ./sprintplan/sprint0.aux
 INPUT ./sprintplan/sprint0.aux
 INPUT sprintplan/sprint0.aux
+INPUT ./sprintplan/RetrospectivaSprint0.aux
+INPUT ./sprintplan/RetrospectivaSprint0.aux
+INPUT sprintplan/RetrospectivaSprint0.aux
 INPUT ./arquitectura.aux
 INPUT ./arquitectura.aux
 INPUT arquitectura.aux
