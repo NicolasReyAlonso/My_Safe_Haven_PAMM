@@ -1,6 +1,6 @@
 # API Documentation - My Safe Haven Backend
 
-## 🔐 Autenticación
+## Autenticación
 
 Todas las rutas protegidas requieren el header:
 ```
@@ -8,9 +8,9 @@ Authorization: Bearer <token_jwt>
 ```
 
 ### POST `/register`
-Registra un nuevo usuario.
+Registra un nuevo usuario. Soporta JSON y multipart/form-data (con imagen).
 
-**Request Body:**
+**Request Body (JSON):**
 ```json
 {
   "username": "usuario123",
@@ -18,6 +18,14 @@ Registra un nuevo usuario.
   "password": "password123",
   "profile_image_path": "opcional/path/imagen.jpg"
 }
+```
+
+**Request Body (multipart/form-data con imagen):**
+```
+username: "usuario123"
+mail: "usuario@email.com"
+password: "password123"
+profile_image: [archivo de imagen]
 ```
 
 **Response (201):**
@@ -29,7 +37,7 @@ Registra un nuevo usuario.
     "id": 1,
     "username": "usuario123",
     "mail": "usuario@email.com",
-    "profile_image_path": null
+    "profile_image_path": "uploads/uuid.jpg"
   }
 }
 ```
@@ -68,9 +76,9 @@ O con email:
 
 ---
 
-## 👤 Usuarios
+## Usuarios
 
-### GET `/users/me` 🔒
+### GET `/users/me` [Protegido] 
 Obtiene información del usuario autenticado.
 
 **Response (200):**
@@ -83,7 +91,7 @@ Obtiene información del usuario autenticado.
 }
 ```
 
-### GET `/users/<user_id>` 🔒
+### GET `/users/<user_id>` [Protegido]
 Obtiene información de un usuario por ID.
 
 **Response (200):**
@@ -96,7 +104,7 @@ Obtiene información de un usuario por ID.
 }
 ```
 
-### PUT `/users/<user_id>` 🔒
+### PUT `/users/<user_id>` [Protegido]
 Actualiza información del usuario (solo el propio usuario).
 
 **Request Body:**
@@ -127,9 +135,9 @@ Actualiza información del usuario (solo el propio usuario).
 
 ---
 
-## 🏠 Havens
+## Havens
 
-### GET `/havens/can-create` 🔒
+### GET `/havens/can-create` [Protegido]
 Verifica si el usuario puede crear más havens.
 
 **Response (200):**
@@ -154,7 +162,7 @@ O si es usuario Pro:
 }
 ```
 
-### POST `/havens` 🔒
+### POST `/havens` [Protegido]
 Crea un nuevo haven.
 
 **Restricciones:**
@@ -198,7 +206,7 @@ Crea un nuevo haven.
 }
 ```
 
-### GET `/havens` 🔒
+### GET `/havens` [Protegido]
 Obtiene todos los havens del usuario autenticado.
 
 **Response (200):**
@@ -215,7 +223,7 @@ Obtiene todos los havens del usuario autenticado.
 ]
 ```
 
-### GET `/havens/<haven_id>` 🔒
+### GET `/havens/<haven_id>` [Protegido]
 Obtiene un haven específico.
 
 **Response (200):**
@@ -230,7 +238,7 @@ Obtiene un haven específico.
 }
 ```
 
-### PUT `/havens/<haven_id>` 🔒
+### PUT `/havens/<haven_id>` [Protegido]
 Actualiza un haven (solo el dueño).
 
 **Request Body:**
@@ -243,7 +251,7 @@ Actualiza un haven (solo el dueño).
 }
 ```
 
-### DELETE `/havens/<haven_id>` 🔒
+### DELETE `/havens/<haven_id>` [Protegido]
 Elimina un haven (solo el dueño).
 
 **Response (200):**
@@ -253,18 +261,95 @@ Elimina un haven (solo el dueño).
 }
 ```
 
----
-
-## 📝 Posts
-
-### POST `/havens/<haven_id>/posts` 🔒
-Crea un post en el feed de un haven.
+### POST `/havens/nearby` [Protegido]
+Obtiene havens cercanos a una ubicación dada.
 
 **Request Body:**
 ```json
 {
+  "latitude": 28.123456,
+  "longitude": -15.654321
+}
+```
+
+**Response (200):**
+```json
+{
+  "count": 2,
+  "havens": [
+    {
+      "haven_id": 1,
+      "user_id": 1,
+      "name": "Mi Casa",
+      "latitude": 28.123456,
+      "longitude": -15.654321,
+      "radius": 100.0,
+      "distance_meters": 45.32
+    }
+  ]
+}
+```
+
+### POST `/havens/<haven_id>/subscribe` [Protegido]
+Suscribirse a un haven para recibir sus actualizaciones.
+
+**Response (201):**
+```json
+{
+  "message": "Suscripción realizada con éxito",
+  "subscription": {
+    "user_id": 1,
+    "haven_id": 5
+  }
+}
+```
+
+### DELETE `/havens/<haven_id>/unsubscribe` [Protegido]
+Desuscribirse de un haven.
+
+**Response (200):**
+```json
+{
+  "message": "Desuscripción exitosa"
+}
+```
+
+### GET `/havens/subscribed` [Protegido]
+Obtiene todos los havens a los que el usuario está suscrito.
+
+**Response (200):**
+```json
+[
+  {
+    "haven_id": 5,
+    "user_id": 2,
+    "name": "Haven Público",
+    "latitude": 28.100000,
+    "longitude": -15.400000,
+    "radius": 200.0,
+    "is_subscribed": true
+  }
+]
+```
+
+---
+
+## Posts
+
+### POST `/havens/<haven_id>/posts` [Protegido]
+Crea un post en el feed de un haven. Soporta JSON y multipart/form-data (con imagen).
+
+**Request Body (JSON):**
+```json
+{
   "content": "Este es el contenido del post"
 }
+```
+
+**Request Body (multipart/form-data con imagen):**
+```
+content: "Post con imagen"
+post_image: [archivo de imagen]
 ```
 
 **Response (201):**
@@ -275,12 +360,13 @@ Crea un post en el feed de un haven.
     "post_id": 1,
     "haven_id": 1,
     "content": "Este es el contenido del post",
+    "image_path": "uploads/uuid.jpg",
     "date": "2025-01-15T10:30:00"
   }
 }
 ```
 
-### GET `/havens/<haven_id>/posts` 🔒
+### GET `/havens/<haven_id>/posts` [Protegido]
 Obtiene todos los posts de un haven (ordenados por fecha descendente).
 
 **Response (200):**
@@ -297,9 +383,9 @@ Obtiene todos los posts de un haven (ordenados por fecha descendente).
 
 ---
 
-## 💬 Chat
+## Chat
 
-### POST `/havens/<haven_id>/messages` 🔒
+### POST `/havens/<haven_id>/messages` [Protegido]
 Envía un mensaje al chat de un haven.
 
 **Request Body:**
@@ -326,7 +412,7 @@ Envía un mensaje al chat de un haven.
 
 **Nota:** Este endpoint también emite una notificación WebSocket a todos los usuarios conectados a ese haven.
 
-### GET `/havens/<haven_id>/messages` 🔒
+### GET `/havens/<haven_id>/messages` [Protegido]
 Obtiene todos los mensajes de un haven (ordenados cronológicamente).
 
 **Response (200):**
@@ -345,7 +431,23 @@ Obtiene todos los mensajes de un haven (ordenados cronológicamente).
 
 ---
 
-## 🔌 WebSocket
+## Archivos
+
+### GET `/uploads/<path:filename>`
+Sirve archivos subidos (imágenes de perfil, imágenes de posts).
+
+**Ejemplo:**
+```
+GET /uploads/abc123def456.jpg
+```
+
+**Response:** Imagen en formato binario
+
+**Formatos permitidos:** png, jpg, jpeg, gif, webp
+
+---
+
+## WebSocket
 
 El servidor utiliza Socket.IO para notificaciones en tiempo real.
 
@@ -399,7 +501,7 @@ socket.on('new_message', (message) => {
 
 ---
 
-## 🛡️ Códigos de Error
+## Códigos de Error
 
 - **400**: Bad Request - Faltan campos requeridos
 - **401**: Unauthorized - Credenciales inválidas o token expirado
@@ -409,7 +511,7 @@ socket.on('new_message', (message) => {
 
 ---
 
-## 📱 Integración con Android
+## Integración con Android
 
 Ver archivo `android_example.kt` para un ejemplo completo de integración con Retrofit y Socket.IO.
 
@@ -422,7 +524,7 @@ Ver archivo `android_example.kt` para un ejemplo completo de integración con Re
 
 ---
 
-## 🚀 Despliegue con Docker
+## Despliegue con Docker
 
 Asegúrate de cambiar `JWT_SECRET_KEY` en producción:
 
