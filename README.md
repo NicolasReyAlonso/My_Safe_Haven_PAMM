@@ -107,7 +107,7 @@ My_Safe_Haven_PAMM/
    - Configurar la IP del backend en `RetrofitClient. kt`
    - Ejecutar la aplicación en un emulador o dispositivo físico
 
-## 📱 Características de la Aplicación
+## Características de la Aplicación
 
 ### Autenticación
 - Registro de usuarios con email y contraseña
@@ -191,5 +191,5 @@ Este proyecto es parte de un proyecto académico (PAMM).
 ---
 
 <p align="center">
-  Desarrollado usando Kotlin y Python
+  Desarrollado usando Android Studio y VS code
 </p>
